@@ -1,45 +1,50 @@
-# Webserv Makefile
-NAME = webserv
-CXX = c++
-CXXFLAGS = -Wall -Wextra -Werror -std=c++98
+EXEC        = webserv
+CC          = c++
+CFLAGS      = -Wall -Werror -Wextra -std=c++98 -I include
+RM          = rm -f
 
-# Source files
-SRCS = main.cpp config_parser.cpp
+# Colors
 
-# Object files
-OBJS = $(SRCS:.cpp=.o)
+DEF_COLOR   = \033[0;39m
+YELLOW      = \033[0;93m
+GREEN       = \033[0;92m
+BLUE        = \033[0;94m
+CYAN        = \033[0;96m
 
-# Header files
-INCS = webserv_config.hpp
+# Sources
+SRC_DIR     = ./src/
+OBJ_DIR     = ./obj/
+SRC_FILES   = main.cpp Server.cpp config_parser.cpp
+SRC         = $(addprefix $(SRC_DIR), $(SRC_FILES))
+OBJ         = $(addprefix $(OBJ_DIR), $(SRC_FILES:.cpp=.o))
 
-# Main rule
-all: $(NAME)
+###
 
-# Compiling the executable
-$(NAME): $(OBJS)
-	$(CXX) $(CXXFLAGS) $(OBJS) -o $(NAME)
-	@echo "$(NAME) has been compiled!"
+OBJF        = .cache_exists
 
-# Compiling object files
-%.o: %.cpp $(INCS)
-	$(CXX) $(CXXFLAGS) -c $< -o $@
+all: $(EXEC)
 
-# Cleaning object files
+$(EXEC): $(OBJ)
+	@echo "$(YELLOW)Linking executable: $(EXEC)$(DEF_COLOR)"
+	@$(CC) $(OBJ) -o $(EXEC)
+	@echo "$(GREEN)Executable $(EXEC) created!$(DEF_COLOR)"
+
+$(OBJ_DIR)%.o: $(SRC_DIR)%.cpp | $(OBJF)
+	@echo "$(YELLOW)Compiling: $< $(DEF_COLOR)"
+	@$(CC) $(CFLAGS) -c $< -o $@
+
+$(OBJF):
+	@mkdir -p $(OBJ_DIR)
+
 clean:
-	rm -f $(OBJS)
-	@echo "Object files have been cleaned!"
+	@$(RM) -rf $(OBJ_DIR)
+	@echo "$(BLUE)Object files cleaned!$(DEF_COLOR)"
 
-# Cleaning everything
 fclean: clean
-	rm -f $(NAME)
-	@echo "$(NAME) has been cleaned!"
+	@$(RM) -f $(EXEC)
+	@echo "$(CYAN)Executable file cleaned!$(DEF_COLOR)"
 
-# Rebuilding everything
 re: fclean all
+	@echo "$(GREEN)Cleaned and rebuilt everything!$(DEF_COLOR)"
 
-# Additional rules
-run: $(NAME)
-	./$(NAME) default.conf
-
-# Phony targets
-.PHONY: all clean fclean re run
+.PHONY: all clean
