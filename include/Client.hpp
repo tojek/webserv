@@ -1,36 +1,26 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   Server.h                                           :+:      :+:    :+:   */
+/*   Client.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: kkonarze <kkonarze@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/05/13 01:45:54 by kkonarze          #+#    #+#             */
-/*   Updated: 2025/05/18 22:55:56 by kkonarze         ###   ########.fr       */
+/*   Created: 2025/06/25 13:13:03 by kkonarze          #+#    #+#             */
+/*   Updated: 2025/06/25 13:16:40 by kkonarze         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #pragma once
-#ifndef SERVER_H
-#define SERVER_H
+#ifndef CLIENT_HPP
+#define CLIENT_HPP
 
-#include <arpa/inet.h>
-
-class Server
+class Client
 {
 private:
-	int server_fd;
-	struct sockaddr_in address;
-	socklen_t addrlen;
-public:
-	Server();
-	~Server();
-	Server(int port);
-	Server(Server& serv);
 
-	int			get_server();
-	sockaddr_in	*get_address();
-	socklen_t	*get_addrlen();
+public:
+	Client();
+	~Client();
 };
 
 #endif

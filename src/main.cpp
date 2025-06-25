@@ -1,5 +1,18 @@
-#include "webserv_config.hpp"
-#include "Server.h"
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   main.cpp                                           :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: kkonarze <kkonarze@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/06/25 12:48:19 by kkonarze          #+#    #+#             */
+/*   Updated: 2025/06/25 13:37:26 by kkonarze         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
+#include "Webserv.hpp"
+#include "Server.hpp"
+#include "Signal.hpp"
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -12,10 +25,9 @@
 #include <sys/epoll.h>
 #include <fcntl.h>
 #include <sys/epoll.h>
-#include <../include/signal.hpp>
 
-std::string make_response() {
-	
+std::string make_response()
+{	
 	std::ifstream index("./static/index.html");
     std::string html;
 	std::stringstream buffer;
@@ -39,36 +51,6 @@ int make_socket_non_blocking(int fd) {
     if (flags == -1) return -1;
     return fcntl(fd, F_SETFL, flags | O_NONBLOCK);
 }
-
-
-// int main(int argc, char* argv[]) {
-	/*MATI*/
-
-    // std::string config_filepath = "default.conf";
-
-    // if (argc > 1) {
-    //     config_filepath = argv[1];
-    // }
-
-    // std::cout << "Attempting to parse: " << config_filepath << std::endl;
-
-    // WebservConfig parsed_config = parse_config_file(config_filepath);
-
-    // std::cout << "\n--- Parsed Configuration ---" << std::endl;
-    // std::cout << "Server Host: " << parsed_config.main_server.host << std::endl;
-    // std::cout << "Server Port: " << parsed_config.main_server.port << std::endl;
-    // std::cout << "Server Name: " << parsed_config.main_server.server_name << std::endl;
-    // std::cout << "Client Max Body Size: " << parsed_config.main_server.client_max_body_size << " bytes" << std::endl;
-
-    // std::cout << "Error Pages:" << std::endl;
-    // for (std::map<int, std::string>::const_iterator it = parsed_config.main_server.error_pages.begin();
-    //      it != parsed_config.main_server.error_pages.end(); ++it) {
-    //     std::cout << "  " << it->first << ": " << it->second << std::endl;
-    // }
-    // std::cout << "--------------------------" << std::endl;
-	// std::cout << "Parsing successful!" << std::endl;
-    //  */
-	/*KACPER*/
 
 int main(int argc, char* argv[]) {
 	(void)argv;
@@ -141,3 +123,33 @@ int main(int argc, char* argv[]) {
 	delete server;
     return 0;
 }
+
+
+// int main(int argc, char* argv[]) {
+	/*MATI*/
+
+    // std::string config_filepath = "default.conf";
+
+    // if (argc > 1) {
+    //     config_filepath = argv[1];
+    // }
+
+    // std::cout << "Attempting to parse: " << config_filepath << std::endl;
+
+    // WebservConfig parsed_config = parse_config_file(config_filepath);
+
+    // std::cout << "\n--- Parsed Configuration ---" << std::endl;
+    // std::cout << "Server Host: " << parsed_config.main_server.host << std::endl;
+    // std::cout << "Server Port: " << parsed_config.main_server.port << std::endl;
+    // std::cout << "Server Name: " << parsed_config.main_server.server_name << std::endl;
+    // std::cout << "Client Max Body Size: " << parsed_config.main_server.client_max_body_size << " bytes" << std::endl;
+
+    // std::cout << "Error Pages:" << std::endl;
+    // for (std::map<int, std::string>::const_iterator it = parsed_config.main_server.error_pages.begin();
+    //      it != parsed_config.main_server.error_pages.end(); ++it) {
+    //     std::cout << "  " << it->first << ": " << it->second << std::endl;
+    // }
+    // std::cout << "--------------------------" << std::endl;
+	// std::cout << "Parsing successful!" << std::endl;
+    //  */
+	/*KACPER*/
