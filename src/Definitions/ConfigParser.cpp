@@ -20,7 +20,7 @@
 
 /**
  * Prints out a error message for parser and exits the program.
- * 
+ *
  * @param message message to print on cerr.
  * @param line_num config file line on which there is error.
  */
@@ -34,8 +34,8 @@ __attribute__((noreturn)) void ConfigParser::parser_error(const std::string& mes
 }
 
 /**
- * Converts string to byte amount while units. 
- * 
+ * Converts string to byte amount while units.
+ *
  * @param s string reference to byte amount.
  * @return Byte amount multiplied by units.
  */
@@ -102,6 +102,8 @@ ConfigParser::ConfigParser(const std::string& filepath) {
     std::string		token;
     std::string		remainder;
 	bool			in_server_block = false;
+    bool            in_location_block = false;
+    std::string     current_location_path;
     int				line_num = 0;
 
     if (!file.is_open()) {
@@ -122,16 +124,68 @@ ConfigParser::ConfigParser(const std::string& filepath) {
             if (token != "server" && remainder != "{")
 				parser_error("Expected 'server {'", line_num);
             in_server_block = true;
-			continue ;
+			continue;
         }
+
+        // Handle location block
+        if (in_location_block)
+        {
+            if (token == "}")
+            {
+                in_location_block = false;
+                continue;
+            }
+
+            // Process location-specific directives
+            size_t semicolon_pos = remainder.find(';');
+            if (semicolon_pos == std::string::npos)
+                parser_error("Missing ';' after '" + token + "' directive in location block.", line_num);
+
+            std::string value = remainder.substr(0, semicolon_pos);
+            trim_whitespace(value);
+
+            // Add the directive to the location map
+            locations[current_location_path][token] = value;
+            continue;
+        }
+
+        // Handle location block start
+        if (token == "location")
+        {
+            // Read location and create location object
+            size_t open_brace_pos = remainder.find('{');
+            if (open_brace_pos == std::string::npos)
+                parser_error("Missing '{' after 'location' directive.", line_num);
+
+            current_location_path = remainder.substr(0, open_brace_pos);
+            trim_whitespace(current_location_path);
+
+            // Add a new location to the map
+            locations[current_location_path] = std::map<std::string, std::string>();
+
+            in_location_block = true;
+            continue;
+        }
+
+        // Handle server block end
+        if (token == "}" && !in_location_block)
+        {
+            in_server_block = false;
+            continue;
+        }
+
+        // Process server directives
 		if (tokens.count(token))
 			(this->*tokens[token])(remainder, line_num);
-		else if (token != "}")
-			parser_error("Unknown directive '" + token + "' inside server block.", line_num);
 		else
-			in_server_block = false;
+			parser_error("Unknown directive '" + token + "' inside server block.", line_num);
     }
+
     file.close();
+
+    if (in_location_block)
+        parser_error("Unexpected EOF. Missing '}' for location block.");
+
     if (in_server_block)
         parser_error("Unexpected EOF. Missing '}' for server block.");
 }
@@ -159,5 +213,10 @@ size_t ConfigParser::get_client_max_body_size() const
 std::map<int, std::string> ConfigParser::get_error_pages() const
 {
 	return error_pages;
+}
+
+const std::map<std::string, std::map<std::string, std::string> >& ConfigParser::get_locations() const
+{
+	return locations;
 }
 

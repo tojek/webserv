@@ -69,7 +69,7 @@ void ConfigParser::read_error_page(const std::string& remainder, int line_num)
 	error_page_str = remainder.substr(0, semicolon_pos);
 	trim_whitespace(error_page_str);
 	space_pos = error_page_str.find(' ');
-	if (space_pos == std::string::npos) 
+	if (space_pos == std::string::npos)
 		parser_error("Invalid 'error_page' format. Expected 'error_page CODE PATH;'", line_num);
 
 	error_code_str = error_page_str.substr(0, space_pos);
@@ -81,10 +81,28 @@ void ConfigParser::read_error_page(const std::string& remainder, int line_num)
 	error_pages[error_code] = error_page_path;
 }
 
+void ConfigParser::read_location(const std::string& remainder, int line_num)
+{
+    std::string location_path;
+
+    // Parse the location path and the opening bracket
+    size_t open_brace_pos = remainder.find('{');
+
+    if (open_brace_pos == std::string::npos)
+        parser_error("Missing '{' after 'location' directive.", line_num);
+
+    location_path = remainder.substr(0, open_brace_pos);
+    trim_whitespace(location_path);
+
+    // Initialize an empty map for this location path
+    locations[location_path] = std::map<std::string, std::string>();
+}
+
 void ConfigParser::fill_tokens()
 {
 	tokens["listen"] = &ConfigParser::read_listen;
 	tokens["server_name"] = &ConfigParser::read_server_name;
 	tokens["client_max_body_size"] = &ConfigParser::read_client_max_body_size;
 	tokens["error_page"] = &ConfigParser::read_error_page;
+	tokens["location"] = &ConfigParser::read_location;
 }

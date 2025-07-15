@@ -15,6 +15,7 @@
 #include <string>
 #include <vector>
 #include <map>
+#include <fstream>
 
 class ConfigParser
 {
@@ -26,11 +27,13 @@ private:
 
 	std::map<std::string, void (ConfigParser::*)(const std::string&, int)>	tokens;
 	std::map<int, std::string>							error_pages; // Map of error codes to error page paths
-	
+	std::map<std::string, std::map<std::string, std::string> > locations; // Map of location paths to directives
+
 	void	read_listen(const std::string& remainder, int line_num);
 	void 	read_server_name(const std::string& remainder, int line_num);
 	void 	read_client_max_body_size(const std::string& remainder, int line_num);
 	void 	read_error_page(const std::string& remainder, int line_num);
+	void    read_location(const std::string& remainder, int line_num);
 	void 	fill_tokens();
 	size_t	parse_size(const std::string& s);
 	void	tokenize(const std::string& line, std::string& token, std::string& reminder);
@@ -44,5 +47,6 @@ public:
 	int		get_port() const;
 	size_t	get_client_max_body_size() const;
 	std::map<int, std::string>	get_error_pages() const;
+	const std::map<std::string, std::map<std::string, std::string> >& get_locations() const;
 };
 
