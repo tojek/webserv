@@ -6,7 +6,7 @@
 /*   By: kkonarze <kkonarze@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/25 12:48:39 by kkonarze          #+#    #+#             */
-/*   Updated: 2025/06/25 13:28:26 by kkonarze         ###   ########.fr       */
+/*   Updated: 2025/07/16 03:02:38 by kkonarze         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,7 +17,12 @@
 #include <cstdlib>
 #include <cstddef>
 #include <string>
-
+#include <cstring> 
+#include <unistd.h>
+#include <arpa/inet.h>
+#include <cstdio>
+#include <sys/epoll.h>
+#include <fcntl.h>
 /**
  * Prints out a error message and exits the program.
  * 
@@ -70,4 +75,41 @@ int string_to_int(const std::string &s)
 	if (iss.fail() || !iss.eof()) // fail if fail or not int
 		error("Invalid integer value '" + s + "'");
 	return num;
+}
+
+/**
+ * Makes the socket non blocking.
+ * 
+ * @param fd File descriptor that should be non blocking.
+ * @return Returns -1 on error, 0 on correct change.
+ */
+int make_socket_non_blocking(int fd)
+{
+    int flags = fcntl(fd, F_GETFL, 0);
+    if (flags == -1) return -1;
+    return fcntl(fd, F_SETFL, flags | O_NONBLOCK);
+}
+
+/**
+ * Makes response for the server.
+ * 
+ * @return Returns response as a string.
+ */
+std::string make_response()
+{	
+	std::ifstream index("./static/index.html");
+    std::string html;
+	std::stringstream buffer;
+	std::ostringstream headers;
+	
+	buffer << index.rdbuf();
+	html = buffer.str();
+    headers << "HTTP/1.1 200 OK\r\n"
+            << "Content-Type: text/html\r\n"
+            << "Content-Length: " << html.size() << "\r\n"
+            << "Connection: close\r\n\r\n"
+            << html;
+
+	index.close();
+    return headers.str();
 }

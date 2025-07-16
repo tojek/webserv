@@ -6,7 +6,7 @@
 /*   By: kkonarze <kkonarze@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/25 12:48:01 by kkonarze          #+#    #+#             */
-/*   Updated: 2025/06/25 12:48:02 by kkonarze         ###   ########.fr       */
+/*   Updated: 2025/07/16 05:18:21 by kkonarze         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,19 +25,27 @@ private:
 	size_t		client_max_body_size; // Maximum client body size in bytes
 	int			port; // Port number
 
-	std::map<std::string, void (ConfigParser::*)(const std::string&, int)>	tokens;
+	int			block_num;
+	std::string	token;
+	std::string	remainder;
+	std::string location_path;
+
+	std::map<std::string, void (ConfigParser::*)(int)>	tokens;
 	std::map<int, std::string>							error_pages; // Map of error codes to error page paths
 	std::map<std::string, std::map<std::string, std::string> > locations; // Map of location paths to directives
 
-	void	read_listen(const std::string& remainder, int line_num);
-	void 	read_server_name(const std::string& remainder, int line_num);
-	void 	read_client_max_body_size(const std::string& remainder, int line_num);
-	void 	read_error_page(const std::string& remainder, int line_num);
-	void    read_location(const std::string& remainder, int line_num);
+	void	read_listen(int line_num);
+	void 	read_server_name(int line_num);
+	void 	read_client_max_body_size(int line_num);
+	void 	read_error_page(int line_num);
+	void    read_location(int line_num);
+	void	read_server(int line_num);
+	void	map_location(int line_num);
 	void 	fill_tokens();
+	
 	size_t	parse_size(const std::string& s);
-	void	tokenize(const std::string& line, std::string& token, std::string& reminder);
-	__attribute__((noreturn)) void	parser_error(const std::string& message, int line_num);
+	void	tokenize(const std::string& line);
+	__attribute__((noreturn)) void	parser_error(const std::string message, int line_num);
 public:
 	ConfigParser(const std::string& filepath);
 	~ConfigParser();

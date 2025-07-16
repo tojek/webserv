@@ -6,13 +6,13 @@
 /*   By: kkonarze <kkonarze@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/25 12:48:15 by kkonarze          #+#    #+#             */
-/*   Updated: 2025/06/25 13:23:33 by kkonarze         ###   ########.fr       */
+/*   Updated: 2025/07/16 05:07:13 by kkonarze         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Webserv.hpp"
 
-void ConfigParser::read_listen(const std::string& remainder, int line_num)
+void ConfigParser::read_listen(int line_num)
 {
 	std::string listen_value;
 	size_t		semicolon_pos = remainder.find(';');
@@ -28,7 +28,7 @@ void ConfigParser::read_listen(const std::string& remainder, int line_num)
 	port = string_to_int((colon_pos == std::string::npos)? listen_value : listen_value.substr(colon_pos + 1));
 }
 
-void ConfigParser::read_server_name(const std::string& remainder, int line_num)
+void ConfigParser::read_server_name(int line_num)
 {
 	std::string	trimmed_name;
 	size_t		semicolon_pos = remainder.find(';');
@@ -41,7 +41,7 @@ void ConfigParser::read_server_name(const std::string& remainder, int line_num)
 	this->server_name = trimmed_name;
 }
 
-void ConfigParser::read_client_max_body_size(const std::string& remainder, int line_num)
+void ConfigParser::read_client_max_body_size(int line_num)
 {
 	std::string	size_str;
 	size_t		semicolon_pos = remainder.find(';');
@@ -54,7 +54,7 @@ void ConfigParser::read_client_max_body_size(const std::string& remainder, int l
 	client_max_body_size = parse_size(size_str);
 }
 
-void ConfigParser::read_error_page(const std::string& remainder, int line_num)
+void ConfigParser::read_error_page(int line_num)
 {
 	std::string	error_page_str;
 	std::string	error_code_str;
@@ -81,21 +81,40 @@ void ConfigParser::read_error_page(const std::string& remainder, int line_num)
 	error_pages[error_code] = error_page_path;
 }
 
-void ConfigParser::read_location(const std::string& remainder, int line_num)
+void ConfigParser::read_location(int line_num)
 {
-    std::string location_path;
-
-    // Parse the location path and the opening bracket
     size_t open_brace_pos = remainder.find('{');
 
     if (open_brace_pos == std::string::npos)
         parser_error("Missing '{' after 'location' directive.", line_num);
-
+		
     location_path = remainder.substr(0, open_brace_pos);
     trim_whitespace(location_path);
 
-    // Initialize an empty map for this location path
     locations[location_path] = std::map<std::string, std::string>();
+}
+
+void ConfigParser::map_location(int line_num)
+{
+	std::string value;
+    size_t semicolon_pos = remainder.find(';');
+
+	if (semicolon_pos == std::string::npos)
+		parser_error("Missing ';' after '" + token + "' directive in location block.", line_num);
+
+	value = remainder.substr(0, semicolon_pos);
+	trim_whitespace(value);
+
+	locations[location_path][token] = value;
+}
+
+void ConfigParser::read_server(int line_num)
+{
+	if (block_num != 0)
+		parser_error("Server block inside of server block on line: ", line_num);
+	if (token != "server" && remainder != "{")
+		parser_error("Expected 'server {'", line_num);
+	block_num++;
 }
 
 void ConfigParser::fill_tokens()
@@ -105,4 +124,6 @@ void ConfigParser::fill_tokens()
 	tokens["client_max_body_size"] = &ConfigParser::read_client_max_body_size;
 	tokens["error_page"] = &ConfigParser::read_error_page;
 	tokens["location"] = &ConfigParser::read_location;
+	tokens["default"] = &ConfigParser::map_location;
+	tokens["server"] = &ConfigParser::read_server;
 }

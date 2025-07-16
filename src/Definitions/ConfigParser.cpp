@@ -6,7 +6,7 @@
 /*   By: kkonarze <kkonarze@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/25 12:48:11 by kkonarze          #+#    #+#             */
-/*   Updated: 2025/06/25 13:35:37 by kkonarze         ###   ########.fr       */
+/*   Updated: 2025/07/16 05:11:18 by kkonarze         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,7 +24,7 @@
  * @param message message to print on cerr.
  * @param line_num config file line on which there is error.
  */
-__attribute__((noreturn)) void ConfigParser::parser_error(const std::string& message, int line_num = -1)
+__attribute__((noreturn)) void ConfigParser::parser_error(const std::string message, int line_num = -1)
 {
     if (line_num >= 0)
         std::cerr << "Parser Error [Line " << line_num << "]: " << message << std::endl;
@@ -80,7 +80,7 @@ size_t ConfigParser::parse_size(const std::string& s)
     }
 }
 
-void ConfigParser::tokenize(const std::string& line, std::string& token, std::string& remainder)
+void ConfigParser::tokenize(const std::string& line)
 {
 	size_t		first_space;
 
@@ -96,98 +96,35 @@ ConfigParser::~ConfigParser()
 
 }
 
-ConfigParser::ConfigParser(const std::string& filepath) {
+ConfigParser::ConfigParser(const std::string& filepath)
+{
     std::ifstream	file(filepath.c_str());
     std::string		line;
-    std::string		token;
-    std::string		remainder;
-	bool			in_server_block = false;
-    bool            in_location_block = false;
-    std::string     current_location_path;
     int				line_num = 0;
 
-    if (!file.is_open()) {
-        parser_error("Could not open configuration file '" + filepath + "'");
-    }
+	block_num = 0;
+	if (!file.is_open())
+		parser_error("Could not open configuration file '" + filepath + "'");
 	fill_tokens();
-    while (std::getline(file, line))
+	while (std::getline(file, line))
 	{
         line_num++;
         remove_comment(line);
         trim_whitespace(line);
         if (line.empty())
             continue;
-
-		tokenize(line, token, remainder);
-        if (!in_server_block)
-		{
-            if (token != "server" && remainder != "{")
-				parser_error("Expected 'server {'", line_num);
-            in_server_block = true;
-			continue;
-        }
-
-        // Handle location block
-        if (in_location_block)
-        {
-            if (token == "}")
-            {
-                in_location_block = false;
-                continue;
-            }
-
-            // Process location-specific directives
-            size_t semicolon_pos = remainder.find(';');
-            if (semicolon_pos == std::string::npos)
-                parser_error("Missing ';' after '" + token + "' directive in location block.", line_num);
-
-            std::string value = remainder.substr(0, semicolon_pos);
-            trim_whitespace(value);
-
-            // Add the directive to the location map
-            locations[current_location_path][token] = value;
-            continue;
-        }
-
-        // Handle location block start
-        if (token == "location")
-        {
-            // Read location and create location object
-            size_t open_brace_pos = remainder.find('{');
-            if (open_brace_pos == std::string::npos)
-                parser_error("Missing '{' after 'location' directive.", line_num);
-
-            current_location_path = remainder.substr(0, open_brace_pos);
-            trim_whitespace(current_location_path);
-
-            // Add a new location to the map
-            locations[current_location_path] = std::map<std::string, std::string>();
-
-            in_location_block = true;
-            continue;
-        }
-
-        // Handle server block end
-        if (token == "}" && !in_location_block)
-        {
-            in_server_block = false;
-            continue;
-        }
-
-        // Process server directives
-		if (tokens.count(token))
-			(this->*tokens[token])(remainder, line_num);
+		tokenize(line);
+	
+		if (tokens.count((block_num == 2)? "default" : token))
+			(this->*tokens[(block_num == 2)? "default" : token])(line_num);
+		else if (token == "}")
+            block_num--;
 		else
 			parser_error("Unknown directive '" + token + "' inside server block.", line_num);
     }
-
     file.close();
-
-    if (in_location_block)
-        parser_error("Unexpected EOF. Missing '}' for location block.");
-
-    if (in_server_block)
-        parser_error("Unexpected EOF. Missing '}' for server block.");
+    if (block_num > 0)
+        parser_error(std::string("Unexpected EOF. Missing '}' for ") + ((block_num == 1)? "server" : "location") + " block.");
 }
 
 const std::string& ConfigParser::get_host() const

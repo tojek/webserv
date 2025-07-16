@@ -6,7 +6,7 @@
 /*   By: kkonarze <kkonarze@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/25 12:48:05 by kkonarze          #+#    #+#             */
-/*   Updated: 2025/06/25 12:48:07 by kkonarze         ###   ########.fr       */
+/*   Updated: 2025/07/16 02:59:48 by kkonarze         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,9 +20,11 @@
 #include <Server.hpp>
 
 // Utils.cpp
-void	error(const std::string& message);
-void	trim_whitespace(std::string& s);
-void	remove_comment(std::string& s);
-int		string_to_int(const std::string& s);
+void		error(const std::string& message);
+void		trim_whitespace(std::string& s);
+void		remove_comment(std::string& s);
+int			string_to_int(const std::string& s);
+int			make_socket_non_blocking(int fd);
+std::string make_response();
 
 #endif

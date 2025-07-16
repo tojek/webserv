@@ -6,7 +6,7 @@
 /*   By: kkonarze <kkonarze@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/13 01:45:54 by kkonarze          #+#    #+#             */
-/*   Updated: 2025/06/14 16:08:05 by kkonarze         ###   ########.fr       */
+/*   Updated: 2025/07/15 23:58:02 by kkonarze         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,22 +15,42 @@
 #define SERVER_H
 
 #include <arpa/inet.h>
+#include <sys/epoll.h>
+#include <map>
+#include "Client.hpp"
+
+class Client;
 
 class Server
 {
 private:
-	int server_fd;
-	struct sockaddr_in address;
-	socklen_t addrlen;
+	int					server_fd;
+	struct sockaddr_in	address;
+	socklen_t			addrlen;
+
+	int					epoll_fd;
+	int					num_of_fds;
+	struct epoll_event	info;
+	struct epoll_event	events[10];
+
+	std::map<int, Client> clients;
+	
 public:
 	Server();
 	~Server();
 	Server(int port);
 	Server(Server& serv);
 
-	int			get_server();
-	sockaddr_in	*get_address();
-	socklen_t	*get_addrlen();
+	void		init_epoll();
+	void		event_loop();
+
+	int						get_server();
+	int						get_epoll_fd();
+	sockaddr_in				&get_address();
+	socklen_t				&get_addrlen();
+	epoll_event				&get_info();
+	epoll_event				*get_events();		
+	std::map<int, Client>	&get_clients();
 };
 
 #endif
