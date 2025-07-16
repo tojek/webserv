@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ConfigTokens.cpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: kkonarze <kkonarze@student.42.fr>          +#+  +:+       +#+        */
+/*   By: mwojtcza <mwojtcza@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/25 12:48:15 by kkonarze          #+#    #+#             */
-/*   Updated: 2025/07/16 05:07:13 by kkonarze         ###   ########.fr       */
+/*   Updated: 2025/07/16 15:45:29 by mwojtcza         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,8 +18,11 @@ void ConfigParser::read_listen(int line_num)
 	size_t		semicolon_pos = remainder.find(';');
 	size_t		colon_pos;
 
+	if (block_num == 0)
+		parser_error("Not inside server block.", line_num);
 	if (semicolon_pos == std::string::npos)
 		parser_error("Missing ';' after 'listen' directive.", line_num);
+
 	listen_value = remainder.substr(0, semicolon_pos);
 	trim_whitespace(listen_value);
 
@@ -33,6 +36,8 @@ void ConfigParser::read_server_name(int line_num)
 	std::string	trimmed_name;
 	size_t		semicolon_pos = remainder.find(';');
 
+	if (block_num == 0)
+		parser_error("Not inside server block.", line_num);
 	if (semicolon_pos == std::string::npos)
 		parser_error("Missing ';' after 'server_name' directive.", line_num);
 
@@ -46,6 +51,8 @@ void ConfigParser::read_client_max_body_size(int line_num)
 	std::string	size_str;
 	size_t		semicolon_pos = remainder.find(';');
 
+	if (block_num == 0)
+		parser_error("Not inside server block.", line_num);
 	if (semicolon_pos == std::string::npos)
 		parser_error("Missing ';' after 'client_max_body_size' directive.", line_num);
 
@@ -63,6 +70,8 @@ void ConfigParser::read_error_page(int line_num)
 	size_t		semicolon_pos = remainder.find(';');
 	int			error_code;
 
+	if (block_num == 0)
+		parser_error("Not inside server block.", line_num);
 	if (semicolon_pos == std::string::npos)
 		parser_error("Missing ';' after 'error_page' directive.", line_num);
 
@@ -85,6 +94,8 @@ void ConfigParser::read_location(int line_num)
 {
     size_t open_brace_pos = remainder.find('{');
 
+	if (block_num == 0)
+		parser_error("Not inside server block.", line_num);
     if (open_brace_pos == std::string::npos)
         parser_error("Missing '{' after 'location' directive.", line_num);
 		
@@ -97,8 +108,8 @@ void ConfigParser::read_location(int line_num)
 void ConfigParser::map_location(int line_num)
 {
 	std::string value;
-    size_t semicolon_pos = remainder.find(';');
-
+	size_t semicolon_pos = remainder.find(';');
+		
 	if (semicolon_pos == std::string::npos)
 		parser_error("Missing ';' after '" + token + "' directive in location block.", line_num);
 
@@ -112,7 +123,7 @@ void ConfigParser::read_server(int line_num)
 {
 	if (block_num != 0)
 		parser_error("Server block inside of server block on line: ", line_num);
-	if (token != "server" && remainder != "{")
+	if (remainder != "{")
 		parser_error("Expected 'server {'", line_num);
 	block_num++;
 }

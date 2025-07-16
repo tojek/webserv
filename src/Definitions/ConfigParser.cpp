@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ConfigParser.cpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: kkonarze <kkonarze@student.42.fr>          +#+  +:+       +#+        */
+/*   By: mwojtcza <mwojtcza@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/25 12:48:11 by kkonarze          #+#    #+#             */
-/*   Updated: 2025/07/16 05:11:18 by kkonarze         ###   ########.fr       */
+/*   Updated: 2025/07/16 15:54:09 by mwojtcza         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -117,8 +117,8 @@ ConfigParser::ConfigParser(const std::string& filepath)
 	
 		if (tokens.count((block_num == 2)? "default" : token))
 			(this->*tokens[(block_num == 2)? "default" : token])(line_num);
-		else if (token == "}")
-            block_num--;
+		else if (token == "}" && remainder == "")
+			block_num--;
 		else
 			parser_error("Unknown directive '" + token + "' inside server block.", line_num);
     }
