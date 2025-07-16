@@ -6,7 +6,7 @@
 /*   By: kkonarze <kkonarze@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/25 12:48:19 by kkonarze          #+#    #+#             */
-/*   Updated: 2025/07/16 05:18:31 by kkonarze         ###   ########.fr       */
+/*   Updated: 2025/07/16 16:02:34 by kkonarze         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,13 +26,14 @@
 #include <fcntl.h>
 #include <sys/epoll.h>
 
-int main(int argc, char* argv[]) {
+int main(int argc, char *argv[])
+{
 	(void)argv;
 	(void)argc;
 
-    setup_signals();
+	setup_signals();
 
-    Server *server = new Server(8080);
+	Server *server = new Server(8080);
 
 	server->init_epoll();
 
@@ -40,10 +41,10 @@ int main(int argc, char* argv[]) {
 
 	std::cout << "\nShutting down server...\n";
 	delete server;
-    return 0;
+	return 0;
 }
 
-    //while (g_signal_state.sigint == 0 && g_signal_state.sigterm == 0) {
+	//while (g_signal_state.sigint == 0 && g_signal_state.sigterm == 0) {
     //    num_of_fds = epoll_wait(watch_set, events, 10, -1);
     //    if (num_of_fds == -1)
     //    {

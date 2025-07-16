@@ -6,7 +6,7 @@
 /*   By: kkonarze <kkonarze@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/14 00:48:40 by kkonarze          #+#    #+#             */
-/*   Updated: 2025/07/16 03:00:41 by kkonarze         ###   ########.fr       */
+/*   Updated: 2025/07/16 17:43:47 by kkonarze         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,6 +28,9 @@ Server::Server()
 
 Server::~Server()
 {
+	int opt = 1;
+	
+	setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt));
 	close(server_fd);
 }
 
@@ -40,7 +43,7 @@ Server::Server(int port)
 	address.sin_family = AF_INET;
 	address.sin_addr.s_addr = INADDR_ANY;
 	address.sin_port = htons(port);
-
+	
 	if (bind(server_fd, (struct sockaddr *)&address, sizeof(address)) < 0)
 		error("bind error.");
 	if (listen(server_fd, 10) < 0)
@@ -73,10 +76,7 @@ void Server::event_loop()
 		for (int x = 0; x < num_of_fds; x++)
 		{
 			if (events[x].data.fd == server_fd)
-			{
-				if (Client::accept_client(*this) < 0)
-					continue ;
-			}
+				Client::accept_client(*this);
 			else
 			{
 				client = Client::find_client(*this, events[x].data.fd);

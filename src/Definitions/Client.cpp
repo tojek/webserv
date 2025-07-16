@@ -6,7 +6,7 @@
 /*   By: kkonarze <kkonarze@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/25 13:16:44 by kkonarze          #+#    #+#             */
-/*   Updated: 2025/07/16 00:44:02 by kkonarze         ###   ########.fr       */
+/*   Updated: 2025/07/16 17:47:18 by kkonarze         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -55,6 +55,7 @@ void Client::send_response(Server &serv)
 {
 	std::string response = make_response();
 
+	std::cout << "response: " << response << std::endl;
 	send(client_fd, response.c_str(), response.size(), 0);
 	close(client_fd);
 	epoll_ctl(serv.get_epoll_fd(), EPOLL_CTL_DEL, client_fd, NULL);

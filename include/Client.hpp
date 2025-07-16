@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Client.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mwojtcza <mwojtcza@student.42.fr>          +#+  +:+       +#+        */
+/*   By: kkonarze <kkonarze@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/25 13:13:03 by kkonarze          #+#    #+#             */
-/*   Updated: 2025/07/16 15:51:12 by mwojtcza         ###   ########.fr       */
+/*   Updated: 2025/07/16 17:47:22 by kkonarze         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,7 +25,6 @@ private:
 	int			client_fd;
 	char		buffer[2048];
 	std::string	response;
-
 	int			blocking_flag;
 
 public:

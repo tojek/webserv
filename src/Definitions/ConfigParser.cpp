@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ConfigParser.cpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mwojtcza <mwojtcza@student.42.fr>          +#+  +:+       +#+        */
+/*   By: kkonarze <kkonarze@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/25 12:48:11 by kkonarze          #+#    #+#             */
-/*   Updated: 2025/07/16 15:54:09 by mwojtcza         ###   ########.fr       */
+/*   Updated: 2025/07/16 16:02:02 by kkonarze         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,11 +26,11 @@
  */
 __attribute__((noreturn)) void ConfigParser::parser_error(const std::string message, int line_num = -1)
 {
-    if (line_num >= 0)
-        std::cerr << "Parser Error [Line " << line_num << "]: " << message << std::endl;
-    else
-        std::cerr << "Parser Error: " << message << std::endl;
-    exit(EXIT_FAILURE);
+	if (line_num >= 0)
+		std::cerr << "Parser Error [Line " << line_num << "]: " << message << std::endl;
+	else
+		std::cerr << "Parser Error: " << message << std::endl;
+	exit(EXIT_FAILURE);
 }
 
 /**
@@ -43,41 +43,44 @@ size_t ConfigParser::parse_size(const std::string& s)
 {
 	size_t		multiplier = 1;
 	size_t		len = s.length();
-    std::string	num_str;
+	std::string	num_str;
 	char		unit;
-    int			num;
+	int			num;
 
-    if (len == 0)
-        parser_error("Empty size value");
-    unit = s[len-1];
+	if (len == 0)
+		parser_error("Empty size value");
+	unit = s[len - 1];
 	switch (unit)
 	{
 		case 'k': case 'K':
 			multiplier = 1024;
-			num_str = s.substr(0, len-1);
-			break;
+			num_str = s.substr(0, len - 1);
+			break ;
 		case 'm': case 'M':
 			multiplier = 1024 * 1024;
-			num_str = s.substr(0, len-1);
-			break;
+			num_str = s.substr(0, len - 1);
+			break ;
 		case 'g': case 'G':
 			multiplier = 1024 * 1024 * 1024;
-			num_str = s.substr(0, len-1);
-			break;
+			num_str = s.substr(0, len - 1);
+			break ;
 		default:
 			if (!isdigit(unit))
 				parser_error("Invalid size unit '" + std::string(1, unit) + "'");
 			num_str = s;
-			break;
+			break ;
 	}
-    try {
-        num = string_to_int(num_str);
-        if (num < 0)
-            parser_error("Size cannot be negative: '" + s + "'");
-        return num * multiplier;
-    } catch (...) {
-        parser_error("Invalid size format '" + s + "'");
-    }
+	try
+	{
+		num = string_to_int(num_str);
+		if (num < 0)
+			parser_error("Size cannot be negative: '" + s + "'");
+		return num * multiplier;
+	}
+	catch (...)
+	{
+		parser_error("Invalid size format '" + s + "'");
+	}
 }
 
 void ConfigParser::tokenize(const std::string& line)
@@ -98,9 +101,9 @@ ConfigParser::~ConfigParser()
 
 ConfigParser::ConfigParser(const std::string& filepath)
 {
-    std::ifstream	file(filepath.c_str());
-    std::string		line;
-    int				line_num = 0;
+	std::ifstream	file(filepath.c_str());
+	std::string		line;
+	int				line_num = 0;
 
 	block_num = 0;
 	if (!file.is_open())
@@ -108,23 +111,23 @@ ConfigParser::ConfigParser(const std::string& filepath)
 	fill_tokens();
 	while (std::getline(file, line))
 	{
-        line_num++;
-        remove_comment(line);
-        trim_whitespace(line);
-        if (line.empty())
-            continue;
+		line_num++;
+		remove_comment(line);
+		trim_whitespace(line);
+		if (line.empty())
+			continue;
 		tokenize(line);
-	
-		if (tokens.count((block_num == 2)? "default" : token))
-			(this->*tokens[(block_num == 2)? "default" : token])(line_num);
+
+		if (tokens.count((block_num == 2) ? "default" : token))
+			(this->*tokens[(block_num == 2) ? "default" : token])(line_num);
 		else if (token == "}" && remainder == "")
 			block_num--;
 		else
 			parser_error("Unknown directive '" + token + "' inside server block.", line_num);
-    }
-    file.close();
-    if (block_num > 0)
-        parser_error(std::string("Unexpected EOF. Missing '}' for ") + ((block_num == 1)? "server" : "location") + " block.");
+	}
+	file.close();
+	if (block_num > 0)
+		parser_error(std::string("Unexpected EOF. Missing '}' for ") + ((block_num == 1) ? "server" : "location") + " block.");
 }
 
 const std::string& ConfigParser::get_host() const
