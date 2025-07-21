@@ -11,6 +11,7 @@
 /* ************************************************************************** */
 
 #include "Webserv.hpp"
+#include <sstream>
 
 void ConfigParser::read_listen(int line_num)
 {
@@ -107,7 +108,7 @@ void ConfigParser::read_location(int line_num)
     trim_whitespace(location_path);
 
     locations[location_path] = std::map<std::string, std::string>();
-    
+
     block_num++;
 }
 
@@ -152,6 +153,128 @@ void ConfigParser::read_root(int line_num)
 		locations[location_path]["root"] = root_value;
 }
 
+void ConfigParser::read_index(int line_num)
+{
+	std::string	index_value;
+	size_t		semicolon_pos = remainder.find(';');
+
+	if (block_num == 0)
+		parser_error("Not inside server block.", line_num);
+	if (semicolon_pos == std::string::npos)
+		parser_error("Missing ';' after 'index' directive.", line_num);
+
+	index_value = remainder.substr(0, semicolon_pos);
+	trim_whitespace(index_value);
+
+	if (block_num == 2)
+		locations[location_path]["index"] = index_value;
+}
+
+void ConfigParser::validate_methods(const std::string& methods, int line_num)
+{
+	// Split the methods string into individual methods
+	std::string method;
+	std::istringstream methods_stream(methods);
+	bool has_valid_method = false;
+
+	// Validate methods
+	if (methods.empty())
+		parser_error("Empty 'allowed_methods' directive.", line_num);
+
+	while (methods_stream >> method)
+	{
+		if (method != "GET" && method != "POST" && method != "DELETE")
+			parser_error("Invalid method '" + method + "' in 'allowed_methods' directive.", line_num);
+		has_valid_method = true;
+	}
+
+	if (!has_valid_method)
+		parser_error("No valid methods in 'allowed_methods' directive.", line_num);
+}
+
+void ConfigParser::read_allowed_methods(int line_num)
+{
+	std::string	methods_value;
+	size_t		semicolon_pos = remainder.find(';');
+
+	if (block_num == 0)
+		parser_error("Not inside server block.", line_num);
+	if (semicolon_pos == std::string::npos)
+		parser_error("Missing ';' after 'allowed_methods' directive.", line_num);
+
+	methods_value = remainder.substr(0, semicolon_pos);
+	trim_whitespace(methods_value);
+
+	validate_methods(methods_value, line_num);
+
+	// Store the allowed methods in the location map
+	if (block_num == 2)
+		locations[location_path]["allowed_methods"] = methods_value;
+}
+
+void ConfigParser::read_upload_dir(int line_num)
+{
+	std::string	upload_dir_value;
+	size_t		semicolon_pos = remainder.find(';');
+
+	if (block_num == 0)
+		parser_error("Not inside server block.", line_num);
+	if (semicolon_pos == std::string::npos)
+		parser_error("Missing ';' after 'upload_dir' directive.", line_num);
+
+	upload_dir_value = remainder.substr(0, semicolon_pos);
+	trim_whitespace(upload_dir_value);
+
+	if (upload_dir_value.empty())
+		parser_error("Empty 'upload_dir' directive.", line_num);
+
+	// Store the upload directory in the location map
+	if (block_num == 2)
+		locations[location_path]["upload_dir"] = upload_dir_value;
+}
+
+void ConfigParser::read_cgi_extension(int line_num)
+{
+	std::string	cgi_extension_value;
+	size_t		semicolon_pos = remainder.find(';');
+
+	if (block_num == 0)
+		parser_error("Not inside server block.", line_num);
+	if (semicolon_pos == std::string::npos)
+		parser_error("Missing ';' after 'cgi_extension' directive.", line_num);
+
+	cgi_extension_value = remainder.substr(0, semicolon_pos);
+	trim_whitespace(cgi_extension_value);
+
+	if (cgi_extension_value.empty())
+		parser_error("Empty 'cgi_extension' directive.", line_num);
+
+	// Store the CGI extension in the location map
+	if (block_num == 2)
+		locations[location_path]["cgi_extension"] = cgi_extension_value;
+}
+
+void ConfigParser::read_directory_listing(int line_num)
+{
+	std::string	directory_listing_value;
+	size_t		semicolon_pos = remainder.find(';');
+
+	if (block_num == 0)
+		parser_error("Not inside server block.", line_num);
+	if (semicolon_pos == std::string::npos)
+		parser_error("Missing ';' after 'directory_listing' directive.", line_num);
+
+	directory_listing_value = remainder.substr(0, semicolon_pos);
+	trim_whitespace(directory_listing_value);
+
+	if (directory_listing_value != "on" && directory_listing_value != "off")
+		parser_error("Invalid 'directory_listing' value. Expected 'on' or 'off'.", line_num);
+
+	// Store the directory listing setting in the location map
+	if (block_num == 2)
+		locations[location_path]["directory_listing"] = directory_listing_value;
+}
+
 void ConfigParser::fill_tokens()
 {
 	tokens["listen"] = &ConfigParser::read_listen;
@@ -162,5 +285,10 @@ void ConfigParser::fill_tokens()
 	tokens["default"] = &ConfigParser::map_location;
 	tokens["server"] = &ConfigParser::read_server;
 	tokens["root"] = &ConfigParser::read_root;
+	tokens["index"] = &ConfigParser::read_index;
+	tokens["allowed_methods"] = &ConfigParser::read_allowed_methods;
+	tokens["upload_dir"] = &ConfigParser::read_upload_dir;
+	tokens["cgi_extension"] = &ConfigParser::read_cgi_extension;
+	tokens["directory_listing"] = &ConfigParser::read_directory_listing;
 }
 

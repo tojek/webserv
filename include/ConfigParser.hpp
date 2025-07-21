@@ -48,11 +48,17 @@ private:
 	void 	read_error_page(int line_num);
 	void    read_location(int line_num);
 	void    read_root(int line_num);
+	void    read_index(int line_num);
+	void    read_allowed_methods(int line_num);
+	void    read_upload_dir(int line_num);
+	void    read_cgi_extension(int line_num);
+	void    read_directory_listing(int line_num);
 	void	read_server(int line_num);
 	void	map_location(int line_num);
 	void 	fill_tokens();
 
 	size_t	parse_size(const std::string& s);
+	void    validate_methods(const std::string& methods, int line_num);
 	void	tokenize(const std::string& line);
 	__attribute__((noreturn)) void	parser_error(const std::string message, int line_num);
 public:
