@@ -19,11 +19,20 @@
 
 class ConfigParser
 {
+public:
+	// Define ListenConfig struct first, before using it
+	struct ListenConfig {
+		std::string host;
+		int port;
+	};
+
 private:
-	std::string	host; // IP address or hostname
+	std::vector<ListenConfig> listen_configs; // List of listen configurations
+	// std::string	host; // IP address or hostname
+	// int			port; // Port number
+
 	std::string server_name;
 	size_t		client_max_body_size; // Maximum client body size in bytes
-	int			port; // Port number
 
 	int			block_num;
 	std::string	token;
@@ -39,10 +48,11 @@ private:
 	void 	read_client_max_body_size(int line_num);
 	void 	read_error_page(int line_num);
 	void    read_location(int line_num);
+	void    read_root(int line_num);
 	void	read_server(int line_num);
 	void	map_location(int line_num);
 	void 	fill_tokens();
-	
+
 	size_t	parse_size(const std::string& s);
 	void	tokenize(const std::string& line);
 	__attribute__((noreturn)) void	parser_error(const std::string message, int line_num);
@@ -50,6 +60,7 @@ public:
 	ConfigParser(const std::string& filepath);
 	~ConfigParser();
 
+	const std::vector<ListenConfig>& get_listen_configs() const { return listen_configs; }
 	const	std::string& get_host() const;
 	const	std::string& get_server_name() const;
 	int		get_port() const;

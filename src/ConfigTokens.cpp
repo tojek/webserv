@@ -27,8 +27,12 @@ void ConfigParser::read_listen(int line_num)
 	trim_whitespace(listen_value);
 
 	colon_pos = listen_value.find(':');
-	host = (colon_pos == std::string::npos)? "0.0.0.0" : listen_value.substr(0, colon_pos);
-	port = string_to_int((colon_pos == std::string::npos)? listen_value : listen_value.substr(colon_pos + 1));
+
+	ListenConfig config;
+
+	config.host = (colon_pos == std::string::npos)? "0.0.0.0" : listen_value.substr(0, colon_pos);
+	config.port = string_to_int((colon_pos == std::string::npos)? listen_value : listen_value.substr(colon_pos + 1));
+	listen_configs.push_back(config);
 }
 
 void ConfigParser::read_server_name(int line_num)
@@ -98,18 +102,20 @@ void ConfigParser::read_location(int line_num)
 		parser_error("Not inside server block.", line_num);
     if (open_brace_pos == std::string::npos)
         parser_error("Missing '{' after 'location' directive.", line_num);
-		
+
     location_path = remainder.substr(0, open_brace_pos);
     trim_whitespace(location_path);
 
     locations[location_path] = std::map<std::string, std::string>();
+    
+    block_num++;
 }
 
 void ConfigParser::map_location(int line_num)
 {
 	std::string value;
 	size_t semicolon_pos = remainder.find(';');
-		
+
 	if (semicolon_pos == std::string::npos)
 		parser_error("Missing ';' after '" + token + "' directive in location block.", line_num);
 
@@ -128,6 +134,24 @@ void ConfigParser::read_server(int line_num)
 	block_num++;
 }
 
+void ConfigParser::read_root(int line_num)
+{
+	std::string	root_value;
+	size_t		semicolon_pos = remainder.find(';');
+
+	if (block_num == 0)
+		parser_error("Not inside server block.", line_num);
+	if (semicolon_pos == std::string::npos)
+		parser_error("Missing ';' after 'root' directive.", line_num);
+
+	root_value = remainder.substr(0, semicolon_pos);
+	trim_whitespace(root_value);
+
+	// If inside a location block, store the root directive in the location map
+	if (block_num == 2)
+		locations[location_path]["root"] = root_value;
+}
+
 void ConfigParser::fill_tokens()
 {
 	tokens["listen"] = &ConfigParser::read_listen;
@@ -137,4 +161,6 @@ void ConfigParser::fill_tokens()
 	tokens["location"] = &ConfigParser::read_location;
 	tokens["default"] = &ConfigParser::map_location;
 	tokens["server"] = &ConfigParser::read_server;
+	tokens["root"] = &ConfigParser::read_root;
 }
+

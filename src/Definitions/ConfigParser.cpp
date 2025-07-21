@@ -118,10 +118,20 @@ ConfigParser::ConfigParser(const std::string& filepath)
 			continue;
 		tokenize(line);
 
-		if (tokens.count((block_num == 2) ? "default" : token))
-			(this->*tokens[(block_num == 2) ? "default" : token])(line_num);
-		else if (token == "}" && remainder == "")
+		if (token == "}" && remainder == "")
 			block_num--;
+		else if (block_num == 2) {
+			// Check for specific location directive handlers
+			if (tokens.count(token))
+				(this->*tokens[token])(line_num);
+			// Use the default for all other location directives
+			else if (tokens.count("default"))
+				(this->*tokens["default"])(line_num);
+			else
+				parser_error("No default handler for location directives.", line_num);
+		}
+		else if (tokens.count(token))
+			(this->*tokens[token])(line_num);
 		else
 			parser_error("Unknown directive '" + token + "' inside server block.", line_num);
 	}
@@ -132,7 +142,12 @@ ConfigParser::ConfigParser(const std::string& filepath)
 
 const std::string& ConfigParser::get_host() const
 {
-	return host;
+    // Return the host of the first listen config, or empty string if none exists
+    if (!listen_configs.empty())
+        return listen_configs[0].host;
+
+    static const std::string empty_string;
+    return empty_string;
 }
 
 const std::string& ConfigParser::get_server_name() const
@@ -142,7 +157,11 @@ const std::string& ConfigParser::get_server_name() const
 
 int ConfigParser::get_port() const
 {
-	return port;
+    // Return the port of the first listen config, or 0 if none exists
+    if (!listen_configs.empty())
+        return listen_configs[0].port;
+
+    return 0;
 }
 
 size_t ConfigParser::get_client_max_body_size() const
@@ -159,4 +178,3 @@ const std::map<std::string, std::map<std::string, std::string> >& ConfigParser::
 {
 	return locations;
 }
-

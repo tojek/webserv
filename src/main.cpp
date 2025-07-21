@@ -17,7 +17,7 @@
 #include <fstream>
 #include <string>
 #include <sstream>
-#include <cstring> 
+#include <cstring>
 #include <unistd.h>
 #include <arpa/inet.h>
 #include <cstdio>
@@ -28,20 +28,70 @@
 
 int main(int argc, char *argv[])
 {
-	(void)argv;
-	(void)argc;
+    std::string config_filepath = "default.conf";
 
-	setup_signals();
+    if (argc > 1) {
+        config_filepath = argv[1];
+    }
 
-	Server *server = new Server(8080);
+    try {
+        // Parse the configuration file
+        std::cout << "Parsing configuration file: " << config_filepath << std::endl;
+        ConfigParser config(config_filepath);
 
-	server->init_epoll();
+        // Display the parsed configuration
+        std::cout << "\n--- Server Configuration ---" << std::endl;
+        std::cout << "Server Name: " << config.get_server_name() << std::endl;
+        std::cout << "Client Max Body Size: " << config.get_client_max_body_size() << " bytes" << std::endl;
 
-	server->event_loop();
+        // Display all listen configurations
+        std::cout << "\n--- Listen Configurations ---" << std::endl;
+        const std::vector<ConfigParser::ListenConfig>& listen_configs = config.get_listen_configs();
+        for (size_t i = 0; i < listen_configs.size(); i++) {
+            std::cout << "Listen " << i+1 << ": " << listen_configs[i].host << ":" << listen_configs[i].port << std::endl;
+        }
 
-	std::cout << "\nShutting down server...\n";
-	delete server;
-	return 0;
+        std::cout << "\n--- Error Pages ---" << std::endl;
+        const std::map<int, std::string>& error_pages = config.get_error_pages();
+        for (std::map<int, std::string>::const_iterator it = error_pages.begin(); it != error_pages.end(); ++it) {
+            std::cout << "  " << it->first << ": " << it->second << std::endl;
+        }
+
+        std::cout << "\n--- Location Blocks ---" << std::endl;
+        const std::map<std::string, std::map<std::string, std::string> >& locations = config.get_locations();
+        for (std::map<std::string, std::map<std::string, std::string> >::const_iterator it = locations.begin();
+             it != locations.end(); ++it) {
+            std::cout << "Location: " << it->first << std::endl;
+
+            const std::map<std::string, std::string>& directives = it->second;
+            for (std::map<std::string, std::string>::const_iterator dir_it = directives.begin();
+                dir_it != directives.end(); ++dir_it) {
+                std::cout << "  " << dir_it->first << ": " << dir_it->second << std::endl;
+            }
+            std::cout << std::endl;
+        }
+
+        setup_signals();
+
+        // For now, just use the first listen configuration
+        // In a more complete implementation, you would create multiple servers
+        if (!listen_configs.empty()) {
+            Server *server = new Server(listen_configs[0].port);
+            server->init_epoll();
+            server->event_loop();
+            std::cout << "\nShutting down server...\n";
+            delete server;
+        } else {
+            std::cerr << "No listen configurations found!" << std::endl;
+            return 1;
+        }
+
+    } catch (const std::exception& e) {
+        std::cerr << "Error: " << e.what() << std::endl;
+        return 1;
+    }
+
+    return 0;
 }
 
 	//while (g_signal_state.sigint == 0 && g_signal_state.sigterm == 0) {
@@ -58,7 +108,7 @@ int main(int argc, char *argv[])
     //        {
     //            // client_fd = accept(server->get_server(), (struct sockaddr*)server->get_address(), server->get_addrlen());
     //            client_fd = accept(server->get_server(), NULL, NULL);
-    //            if (client_fd < 0) 
+    //            if (client_fd < 0)
 	//			{
     //            	perror("accept");
     //            	continue;
@@ -81,31 +131,3 @@ int main(int argc, char *argv[])
     //    	}
     //    }
     //}
-// int main(int argc, char* argv[]) {
-	/*MATI*/
-
-    // std::string config_filepath = "default.conf";
-
-    // if (argc > 1) {
-    //     config_filepath = argv[1];
-    // }
-
-    // std::cout << "Attempting to parse: " << config_filepath << std::endl;
-
-    // WebservConfig parsed_config = parse_config_file(config_filepath);
-
-    // std::cout << "\n--- Parsed Configuration ---" << std::endl;
-    // std::cout << "Server Host: " << parsed_config.main_server.host << std::endl;
-    // std::cout << "Server Port: " << parsed_config.main_server.port << std::endl;
-    // std::cout << "Server Name: " << parsed_config.main_server.server_name << std::endl;
-    // std::cout << "Client Max Body Size: " << parsed_config.main_server.client_max_body_size << " bytes" << std::endl;
-
-    // std::cout << "Error Pages:" << std::endl;
-    // for (std::map<int, std::string>::const_iterator it = parsed_config.main_server.error_pages.begin();
-    //      it != parsed_config.main_server.error_pages.end(); ++it) {
-    //     std::cout << "  " << it->first << ": " << it->second << std::endl;
-    // }
-    // std::cout << "--------------------------" << std::endl;
-	// std::cout << "Parsing successful!" << std::endl;
-    //  */
-	/*KACPER*/
