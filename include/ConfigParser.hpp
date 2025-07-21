@@ -20,7 +20,6 @@
 class ConfigParser
 {
 public:
-	// Define ListenConfig struct first, before using it
 	struct ListenConfig {
 		std::string host;
 		int port;
