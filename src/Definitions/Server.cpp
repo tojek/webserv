@@ -13,6 +13,7 @@
 #include "Server.hpp"
 #include "Webserv.hpp"
 #include "Signal.hpp"
+#include "Request.hpp"
 #include <iostream>
 #include <string>
 #include <unistd.h>
@@ -28,9 +29,9 @@ Server::Server()
 
 Server::~Server()
 {
-	int opt = 1;
+	// int opt = 1;
 	
-	setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt));
+	// setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt));
 	close(server_fd);
 }
 
@@ -39,11 +40,13 @@ Server::Server(int port)
 	server_fd = socket(AF_INET, SOCK_STREAM, 0);
 	if (server_fd == -1)
 		error("socket error.");
+	int opt = 1;
 
 	address.sin_family = AF_INET;
 	address.sin_addr.s_addr = INADDR_ANY;
 	address.sin_port = htons(port);
 	
+	setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt));
 	if (bind(server_fd, (struct sockaddr *)&address, sizeof(address)) < 0)
 		error("bind error.");
 	if (listen(server_fd, 10) < 0)

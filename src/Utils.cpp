@@ -113,3 +113,20 @@ std::string make_response()
 	index.close();
     return headers.str();
 }
+
+std::vector<std::string>	ft_split(std::string str, std::string delimiter)
+{
+	size_t end, start;
+	std::string sub;
+	std::vector<std::string> ret;
+	start = 0;
+
+	while (end != std::string::npos)
+	{
+		end = str.find(delimiter, start);
+		sub = str.substr(start, end - start);
+		start = end + delimiter.size();
+		ret.push_back(sub);
+	}
+	return (ret);
+}

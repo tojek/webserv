@@ -18,6 +18,7 @@
 #include <string>
 #include <ConfigParser.hpp>
 #include <Server.hpp>
+#include <vector>
 
 // Utils.cpp
 void		error(const std::string& message);
@@ -25,6 +26,8 @@ void		trim_whitespace(std::string& s);
 void		remove_comment(std::string& s);
 int			string_to_int(const std::string& s);
 int			make_socket_non_blocking(int fd);
+
+std::vector<std::string>	ft_split(std::string str, std::string delimiter);
 std::string make_response();
 
 #endif

@@ -12,6 +12,7 @@
 
 #include "Client.hpp"
 #include "Server.hpp"
+#include "Request.hpp"
 #include "Webserv.hpp"
 #include <iostream>
 #include <string>
@@ -46,16 +47,16 @@ Client *Client::find_client(Server &serv, int event_fd)
 
 void Client::read_request()
 {
-	std::memset(buffer, 0, sizeof(buffer));
-	read(client_fd, buffer, sizeof(buffer) - 1);
-	std::cout << "Zapytanie:\n" << buffer << std::endl;
+	request->read_request(client_fd);
 }
 
 void Client::send_response(Server &serv)
 {
+	// delete request!
+	// delete request;
 	std::string response = make_response();
 
-	std::cout << "response: " << response << std::endl;
+	// std::cout << "response: " << response << std::endl;
 	send(client_fd, response.c_str(), response.size(), 0);
 	close(client_fd);
 	epoll_ctl(serv.get_epoll_fd(), EPOLL_CTL_DEL, client_fd, NULL);
@@ -75,6 +76,7 @@ Client::Client(Server &serv)
 {
 	epoll_event	info;
 
+	request = new Request();
 	std::memset(buffer, 0, sizeof(buffer));
 	client_fd = accept(serv.get_server(), NULL, NULL);
 	if (client_fd < 0) 
@@ -91,10 +93,16 @@ Client::Client(Server &serv)
 	blocking_flag = 0;
 	info = serv.get_info();
 	info.events = EPOLLIN | EPOLLET;
-    info.data.fd = client_fd;
-    epoll_ctl(serv.get_epoll_fd(), EPOLL_CTL_ADD, client_fd, &info);
+	info.data.fd = client_fd;
+	epoll_ctl(serv.get_epoll_fd(), EPOLL_CTL_ADD, client_fd, &info);
 }
 
 Client::~Client()
 {
+	// delete request;
 }
+
+// void	Client::set_request()
+// {
+// 	request = Request(client_fd);
+// }

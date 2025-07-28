@@ -18,6 +18,7 @@
 #include "Server.hpp"
 
 class Server;
+class Request;
 
 class Client
 {
@@ -26,12 +27,12 @@ private:
 	char		buffer[2048];
 	std::string	response;
 	int			blocking_flag;
-
+	// void		set_request();
 public:
 	static int		accept_client(Server &serv);
 	static Client	*find_client(Server &serv, int event_fd);
-
 	void			read_request();
+	Request		*request;
 	void			send_response(Server &serv);
 	int				get_client_fd();
 	int				get_blocking_flag();
