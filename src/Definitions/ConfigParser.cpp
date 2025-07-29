@@ -6,7 +6,7 @@
 /*   By: kkonarze <kkonarze@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/25 12:48:11 by kkonarze          #+#    #+#             */
-/*   Updated: 2025/07/29 05:26:15 by kkonarze         ###   ########.fr       */
+/*   Updated: 2025/07/29 05:40:46 by kkonarze         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -127,9 +127,7 @@ ConfigParser::ConfigParser(const std::string& filepath)
 		if (token == "}" && remainder == "")
 			block_num--;
 		else if (block_num == 2)
-		{
-			
-		}
+			conf.locations.back().find_token(line_num, token, remainder);
 		else if (tokens.count(token))
 			(this->*tokens[token])(line_num);
 		else
