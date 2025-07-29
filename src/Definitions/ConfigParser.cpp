@@ -6,11 +6,12 @@
 /*   By: kkonarze <kkonarze@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/25 12:48:11 by kkonarze          #+#    #+#             */
-/*   Updated: 2025/07/16 16:02:02 by kkonarze         ###   ########.fr       */
+/*   Updated: 2025/07/29 05:26:15 by kkonarze         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Webserv.hpp"
+#include "ConfigParser.hpp"
 #include <fstream>
 #include <iostream>
 #include <sstream>
@@ -99,6 +100,11 @@ ConfigParser::~ConfigParser()
 
 }
 
+ConfigParser::ConfigParser()
+{
+
+}
+
 ConfigParser::ConfigParser(const std::string& filepath)
 {
 	std::ifstream	file(filepath.c_str());
@@ -120,15 +126,9 @@ ConfigParser::ConfigParser(const std::string& filepath)
 
 		if (token == "}" && remainder == "")
 			block_num--;
-		else if (block_num == 2) {
-			// Check for specific location directive handlers
-			if (tokens.count(token))
-				(this->*tokens[token])(line_num);
-			// Use the default for all other location directives
-			else if (tokens.count("default"))
-				(this->*tokens["default"])(line_num);
-			else
-				parser_error("No default handler for location directives.", line_num);
+		else if (block_num == 2)
+		{
+			
 		}
 		else if (tokens.count(token))
 			(this->*tokens[token])(line_num);
@@ -140,41 +140,25 @@ ConfigParser::ConfigParser(const std::string& filepath)
 		parser_error(std::string("Unexpected EOF. Missing '}' for ") + ((block_num == 1) ? "server" : "location") + " block.");
 }
 
-const std::string& ConfigParser::get_host() const
+const Config&	ConfigParser::get_config() const
 {
-    // Return the host of the first listen config, or empty string if none exists
-    if (!listen_configs.empty())
-        return listen_configs[0].host;
-
-    static const std::string empty_string;
-    return empty_string;
+	return conf;
 }
 
-const std::string& ConfigParser::get_server_name() const
-{
-	return server_name;
-}
+//const std::string& ConfigParser::get_host() const
+//{
+//    if (!listen_configs.empty())
+//        return listen_configs[0].host;
 
-int ConfigParser::get_port() const
-{
-    // Return the port of the first listen config, or 0 if none exists
-    if (!listen_configs.empty())
-        return listen_configs[0].port;
+//    static const std::string empty_string;
+//    return empty_string;
+//}
 
-    return 0;
-}
+//int ConfigParser::get_port() const
+//{
+//    // Return the port of the first listen config, or 0 if none exists
+//    if (!listen_configs.empty())
+//        return listen_configs[0].port;
 
-size_t ConfigParser::get_client_max_body_size() const
-{
-	return client_max_body_size;
-}
-
-std::map<int, std::string> ConfigParser::get_error_pages() const
-{
-	return error_pages;
-}
-
-const std::map<std::string, std::map<std::string, std::string> >& ConfigParser::get_locations() const
-{
-	return locations;
-}
+//    return 0;
+//}

@@ -6,7 +6,7 @@
 /*   By: kkonarze <kkonarze@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/25 12:48:39 by kkonarze          #+#    #+#             */
-/*   Updated: 2025/07/16 17:47:55 by kkonarze         ###   ########.fr       */
+/*   Updated: 2025/07/29 05:25:19 by kkonarze         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -114,19 +114,25 @@ std::string make_response()
     return headers.str();
 }
 
+/**
+ * Splits string by delimiter.
+ * 
+ * @param str String to be splited.
+ * @param delimiter Delimiter by which string is splitted.
+ * @return Returns splited spaces in vector of strings
+ */
 std::vector<std::string>	ft_split(std::string str, std::string delimiter)
 {
-	size_t end, start;
-	std::string sub;
-	std::vector<std::string> ret;
-	start = 0;
+	size_t						end = 0, start = 0;
+	std::string					sub;
+	std::vector<std::string>	result;
 
 	while (end != std::string::npos)
 	{
 		end = str.find(delimiter, start);
 		sub = str.substr(start, end - start);
 		start = end + delimiter.size();
-		ret.push_back(sub);
+		result.push_back(sub);
 	}
-	return (ret);
+	return (result);
 }

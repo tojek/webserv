@@ -6,7 +6,7 @@
 /*   By: kkonarze <kkonarze@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/25 13:13:03 by kkonarze          #+#    #+#             */
-/*   Updated: 2025/07/16 17:47:22 by kkonarze         ###   ########.fr       */
+/*   Updated: 2025/07/28 18:43:32 by kkonarze         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,15 +24,12 @@ class Client
 {
 private:
 	int			client_fd;
-	char		buffer[2048];
-	std::string	response;
 	int			blocking_flag;
-	// void		set_request();
+	Request		*request;
 public:
 	static int		accept_client(Server &serv);
 	static Client	*find_client(Server &serv, int event_fd);
 	void			read_request();
-	Request		*request;
 	void			send_response(Server &serv);
 	int				get_client_fd();
 	int				get_blocking_flag();
