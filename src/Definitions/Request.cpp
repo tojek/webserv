@@ -15,6 +15,7 @@ void Request::parse_request()
 			body_flag = true;
 			continue ;
 		}
+		std::cout << LIGHT_BLUE <<  line << RESET << std::endl;
 		process_line(line, line_num, body_flag);
 	}	
 }
@@ -51,8 +52,11 @@ void Request::parse_requestline(std::string& line)
 
 	request_line = ft_split(line, " ");
 	tokens["method"] = request_line[0];
+	std::cout << LIGHT_BLUE<< "method: "<<RESET << tokens["method"] << std::endl;
 	tokens["request_uri"] = request_line[1];
+	std::cout << LIGHT_BLUE<<"request uri: "<<RESET<<tokens["request_uri"] << std::endl;
 	tokens["HTTP_version"] = request_line[2];
+	std::cout << LIGHT_BLUE<<"HTTP version: "<<RESET<<tokens["HTTP_version"] << std::endl;
 }
 
 void Request::parse_header(std::string& line)
@@ -79,6 +83,7 @@ void Request::parse_body(std::string& line)
 	{
 		pair = ft_split(body_pairs[i], "=");
 		tokens[pair[0]] = pair[1];
+		std::cout << pair[0] << ": "<< RESET << tokens[pair[0]] << std::endl;
 		i++;
 	}
 }
