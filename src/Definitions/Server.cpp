@@ -6,7 +6,7 @@
 /*   By: kkonarze <kkonarze@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/14 00:48:40 by kkonarze          #+#    #+#             */
-/*   Updated: 2025/07/16 17:43:47 by kkonarze         ###   ########.fr       */
+/*   Updated: 2025/07/29 05:33:22 by kkonarze         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,10 +22,6 @@
 #include <sys/epoll.h>
 #include <errno.h>
 
-Server::Server()
-{
-
-}
 
 Server::~Server()
 {
@@ -35,7 +31,7 @@ Server::~Server()
 	close(server_fd);
 }
 
-Server::Server(int port)
+Server::Server(const Config& conf) : conf(conf)
 {
 	server_fd = socket(AF_INET, SOCK_STREAM, 0);
 	if (server_fd == -1)
@@ -44,7 +40,7 @@ Server::Server(int port)
 
 	address.sin_family = AF_INET;
 	address.sin_addr.s_addr = INADDR_ANY;
-	address.sin_port = htons(port);
+	address.sin_port = htons(conf.port);
 	
 	setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt));
 	if (bind(server_fd, (struct sockaddr *)&address, sizeof(address)) < 0)
@@ -52,7 +48,7 @@ Server::Server(int port)
 	if (listen(server_fd, 10) < 0)
 		error("listen error.");
 	addrlen = sizeof(address);
-	std::cout << "Serwer działa na http://localhost:" << port << std::endl;
+	std::cout << "Serwer działa na http://localhost:" << conf.port << std::endl;
 }
 
 void Server::init_epoll()
@@ -127,7 +123,7 @@ std::map<int, Client> &Server::get_clients()
 	return (clients);
 }
 
-Server::Server(Server& serv)
+Server::Server(Server& serv) : conf(serv.conf)
 {
 	if (this == &serv)
 		return ;

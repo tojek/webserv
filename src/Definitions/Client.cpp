@@ -6,7 +6,7 @@
 /*   By: kkonarze <kkonarze@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/25 13:16:44 by kkonarze          #+#    #+#             */
-/*   Updated: 2025/07/16 17:47:18 by kkonarze         ###   ########.fr       */
+/*   Updated: 2025/07/29 01:06:16 by kkonarze         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,16 +47,16 @@ Client *Client::find_client(Server &serv, int event_fd)
 
 void Client::read_request()
 {
-	request->read_request(client_fd);
+	if (request != NULL)
+		delete request;
+	request = new Request(client_fd);
+	request->parse_request();
 }
 
 void Client::send_response(Server &serv)
 {
-	// delete request!
-	// delete request;
 	std::string response = make_response();
 
-	// std::cout << "response: " << response << std::endl;
 	send(client_fd, response.c_str(), response.size(), 0);
 	close(client_fd);
 	epoll_ctl(serv.get_epoll_fd(), EPOLL_CTL_DEL, client_fd, NULL);
@@ -76,8 +76,7 @@ Client::Client(Server &serv)
 {
 	epoll_event	info;
 
-	request = new Request();
-	std::memset(buffer, 0, sizeof(buffer));
+	request = NULL;
 	client_fd = accept(serv.get_server(), NULL, NULL);
 	if (client_fd < 0) 
 	{
@@ -99,10 +98,6 @@ Client::Client(Server &serv)
 
 Client::~Client()
 {
-	// delete request;
+	if (request != NULL)
+		delete request;
 }
-
-// void	Client::set_request()
-// {
-// 	request = Request(client_fd);
-// }

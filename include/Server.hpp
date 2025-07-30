@@ -6,7 +6,7 @@
 /*   By: kkonarze <kkonarze@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/13 01:45:54 by kkonarze          #+#    #+#             */
-/*   Updated: 2025/07/15 23:58:02 by kkonarze         ###   ########.fr       */
+/*   Updated: 2025/07/29 05:33:27 by kkonarze         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,6 +18,7 @@
 #include <sys/epoll.h>
 #include <map>
 #include "Client.hpp"
+#include "Config.hpp"
 
 class Client;
 
@@ -25,6 +26,8 @@ class Server
 {
 private:
 	int					server_fd;
+
+	const Config&		conf;
 	struct sockaddr_in	address;
 	socklen_t			addrlen;
 
@@ -36,9 +39,8 @@ private:
 	std::map<int, Client> clients;
 	
 public:
-	Server();
 	~Server();
-	Server(int port);
+	Server(const Config& conf);
 	Server(Server& serv);
 
 	void		init_epoll();

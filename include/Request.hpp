@@ -10,6 +10,7 @@
 #include "Webserv.hpp"
 #include <iostream>
 #include <string>
+#include <sstream>
 #include <unistd.h>
 #include <cstdio>
 #include <arpa/inet.h>
@@ -20,23 +21,18 @@
 
 class Request
 {
-	public:
-		Request();
-		// Request(int client_fd);
-		~Request();
-		void read_request(int client_fd);
 	private:
 		char buffer[2048];
 		std::map<std::string, std::string> tokens;
-		
-		std::vector<std::string>	request_line;
-		std::vector<std::string>	headers;
-		std::vector<std::string>	body;
-		bool 						body_flag;
 
+		void process_line(std::string& line, int line_num, bool body_flag);
+		void parse_requestline(std::string& line);
+		void parse_header(std::string& line);
+		void parse_body(std::string& line);
+	public:
+		Request();
+		Request(int client_fd);
+		~Request();
 
-		void process_line(std::string line, int line_num);
-		void parse_requestline(std::string line);
-		void parse_header(std::string line);
-		void parse_body(std::string line);
+		void parse_request();
 };

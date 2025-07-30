@@ -1,33 +1,31 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   Webserv.hpp                                        :+:      :+:    :+:   */
+/*   Config.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: kkonarze <kkonarze@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/06/25 12:48:05 by kkonarze          #+#    #+#             */
-/*   Updated: 2025/07/29 05:25:20 by kkonarze         ###   ########.fr       */
+/*   Created: 2025/07/29 05:11:45 by kkonarze          #+#    #+#             */
+/*   Updated: 2025/07/29 05:21:14 by kkonarze         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #pragma once
+#ifndef CONFIG_HPP
+#define CONFIG_HPP
 
-#ifndef WEBSERV_HPP
-#define WEBSERV_HPP
-
+#include "Location.hpp"
 #include <string>
-
+#include <map>
 #include <vector>
 
-// Utils.cpp
-void						error(const std::string& message);
-void						trim_whitespace(std::string& s);
-void						remove_comment(std::string& s);
-int							string_to_int(const std::string& s);
-int							make_socket_non_blocking(int fd);
-std::vector<std::string>	ft_split(std::string str, std::string delimiter);
-
-// hardcode
-std::string make_response();
+struct Config {
+	std::string host;
+	int port;
+	size_t client_max_body_size;
+	std::string server_name;
+	std::map<int, std::string> error_pages;
+	std::vector<Location> locations;
+};
 
 #endif
