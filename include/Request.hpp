@@ -1,5 +1,11 @@
 #pragma once
 
+#define PINK "\033[1;38;5;205m"       // Bold Pink
+#define LIGHT_PINK "\033[1;38;5;217m" // Bold Light Pink
+#define LIGHT_BLUE "\033[1;38;5;153m" // Bold Light Blue
+#define RESET "\033[0m"               // Reset to default color
+
+
 #include "Server.hpp"
 #include "Webserv.hpp"
 #include <iostream>
