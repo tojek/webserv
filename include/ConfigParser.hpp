@@ -23,7 +23,8 @@
 class ConfigParser
 {
 private:
-	Config		conf;
+	std::vector<Config>	servers;
+	Config*				current_server;
 
 	int			block_num;
 	std::string	token;
@@ -44,12 +45,17 @@ private:
 	size_t		parse_size(const std::string& s);
 	void		tokenize(const std::string& line);
 	__attribute__((noreturn)) void	parser_error(const std::string message, int line_num);
+
+	// Helper methods for server matching
+	bool		server_matches_exact(const Config& server, const std::string& host, int port) const;
+	bool		server_matches_port(const Config& server, int port) const;
 public:
 	ConfigParser(const std::string& filepath);
 	ConfigParser();
 	~ConfigParser();
 
-	const	Config&		get_config() const;
+	const std::vector<Config>&	get_servers() const;
+	const Config*				find_server(const std::string& host, int port) const;
 };
 
 

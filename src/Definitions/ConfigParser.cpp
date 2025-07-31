@@ -112,9 +112,12 @@ ConfigParser::ConfigParser(const std::string& filepath)
 	int				line_num = 0;
 
 	block_num = 0;
+	current_server = NULL;  // Initialize current_server pointer
+
 	if (!file.is_open())
 		parser_error("Could not open configuration file '" + filepath + "'");
 	fill_tokens();
+
 	while (std::getline(file, line))
 	{
 		line_num++;
@@ -125,38 +128,80 @@ ConfigParser::ConfigParser(const std::string& filepath)
 		tokenize(line);
 
 		if (token == "}" && remainder == "")
+		{
 			block_num--;
+			if (block_num == 0)
+				current_server = NULL;  // Reset when leaving server block
+		}
 		else if (tokens.count(token))
 			(this->*tokens[token])(line_num);
-		else if (block_num == 2)
-			conf.locations.back().find_token(line_num, token, remainder);
+		else if (block_num == 2 && current_server != NULL)
+			current_server->locations.back().find_token(line_num, token, remainder);
 		else
 			parser_error("Unknown directive '" + token + "' inside server block.", line_num);
 	}
 	file.close();
 	if (block_num > 0)
 		parser_error(std::string("Unexpected EOF. Missing '}' for ") + ((block_num == 1) ? "server" : "location") + " block.");
+
+	// Validate that we have at least one server
+	if (servers.empty())
+		parser_error("No server blocks found in configuration file.");
 }
 
-const Config&	ConfigParser::get_config() const
+const std::vector<Config>& ConfigParser::get_servers() const
 {
-	return conf;
+	return servers;
 }
 
-//const std::string& ConfigParser::get_host() const
-//{
-//    if (!listen_configs.empty())
-//        return listen_configs[0].host;
+//Check if a server listens on the given host and port.
+bool ConfigParser::server_matches_exact(const Config& server, const std::string& host, int port) const
+{
+	std::vector<ListenConfig>::const_iterator it;
 
-//    static const std::string empty_string;
-//    return empty_string;
-//}
+	for (it = server.listen_configs.begin(); it != server.listen_configs.end(); ++it)
+	{
+		if (it->port == port && (it->host == host || it->host == "0.0.0.0"))
+			return true;
+	}
+	return false;
+}
 
-//int ConfigParser::get_port() const
-//{
-//    // Return the port of the first listen config, or 0 if none exists
-//    if (!listen_configs.empty())
-//        return listen_configs[0].port;
 
-//    return 0;
-//}
+// Check if a server listens on the given port (ignore host).
+bool ConfigParser::server_matches_port(const Config& server, int port) const
+{
+	std::vector<ListenConfig>::const_iterator it;
+
+	for (it = server.listen_configs.begin(); it != server.listen_configs.end(); ++it)
+	{
+		if (it->port == port)
+			return true;
+	}
+	return false;
+}
+
+/**
+ * Find the appropriate server configuration based on host and port.
+ * Uses a three-tier selection strategy: exact match -> port match -> first server.
+ */
+const Config* ConfigParser::find_server(const std::string& host, int port) const
+{
+	std::vector<Config>::const_iterator it;
+
+	if (servers.empty())
+		return NULL;
+
+	// Exact host:port match
+	for (it = servers.begin(); it != servers.end(); ++it)
+		if (server_matches_exact(*it, host, port))
+			return &(*it);
+
+	// Port-only match
+	for (it = servers.begin(); it != servers.end(); ++it)
+		if (server_matches_port(*it, port))
+			return &(*it);
+
+	// Default fallback
+	return &servers[0];
+}
