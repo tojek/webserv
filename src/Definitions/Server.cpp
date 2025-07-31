@@ -113,6 +113,12 @@ epoll_event	*Server::get_events()
 	return (events);
 }
 
+// roboczo na potrzeby Response
+const Config &Server::get_config()
+{
+	return (conf);
+}
+
 int	Server::get_epoll_fd()
 {
 	return (epoll_fd);
