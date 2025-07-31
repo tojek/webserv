@@ -78,3 +78,8 @@ Location::~Location()
 {
 	
 }
+
+std::string Location::get_location_path()
+{
+	return(location_path);
+}

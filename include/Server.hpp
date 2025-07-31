@@ -53,6 +53,8 @@ public:
 	epoll_event				&get_info();
 	epoll_event				*get_events();		
 	std::map<int, Client>	&get_clients();
+
+	const Config			&get_config();
 };
 
 #endif

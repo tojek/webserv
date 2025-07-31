@@ -41,6 +41,8 @@ public:
 	Location();
 	Location(std::string& location_path);
 	~Location();
+
+	std::string get_location_path();
 };
 
 #endif

@@ -136,3 +136,16 @@ std::vector<std::string>	ft_split(std::string str, std::string delimiter)
 	}
 	return (result);
 }
+
+std::string	get_file_type(std::string file_path)
+{
+	std::vector<std::string>	vec1, vec2;
+	std::string					filename;
+
+	vec1 = ft_split(file_path, "/");
+	filename = vec1.back();
+	// std::cout << filename << std::endl;
+	vec2 = ft_split(filename, ".");
+	// std::cout << vec2[1] << std::endl;
+	return ("text/" + vec2[1]);
+}

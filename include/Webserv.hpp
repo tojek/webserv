@@ -26,6 +26,7 @@ void						remove_comment(std::string& s);
 int							string_to_int(const std::string& s);
 int							make_socket_non_blocking(int fd);
 std::vector<std::string>	ft_split(std::string str, std::string delimiter);
+std::string					get_file_type(std::string file_path);
 
 // hardcode
 std::string make_response();

@@ -22,17 +22,23 @@
 class Request
 {
 	private:
-		char buffer[2048];
-		std::map<std::string, std::string> tokens;
+		char								buffer[2048];
+		std::map<std::string, std::string>	tokens;
 
-		void process_line(std::string& line, int line_num, bool body_flag);
-		void parse_requestline(std::string& line);
-		void parse_header(std::string& line);
-		void parse_body(std::string& line);
+		void	process_line(std::string& line, int line_num, bool body_flag);
+		void	parse_requestline(std::string& line);
+		void	parse_header(std::string& line);
+		void	parse_body(std::string& line);
+
 	public:
 		Request();
 		Request(int client_fd);
 		~Request();
 
-		void parse_request();
+		void		parse_request();
+
+		std::string	get_method();
+		std::string	get_request_uri();
+		std::string	get_host();
+		std::string	get_http_version();
 };

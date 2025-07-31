@@ -13,6 +13,7 @@
 #include "Client.hpp"
 #include "Server.hpp"
 #include "Request.hpp"
+#include "Response.hpp"
 #include "Webserv.hpp"
 #include <iostream>
 #include <string>
@@ -55,9 +56,14 @@ void Client::read_request()
 
 void Client::send_response(Server &serv)
 {
-	std::string response = make_response();
+	// (Client *Response response) response = new Response();
+	if (response != NULL)
+		delete response;
+	response = new Response();
+	response->init_response(request, &serv);
+	std::string resrc = response->make_response();
 
-	send(client_fd, response.c_str(), response.size(), 0);
+	send(client_fd, resrc.c_str(), resrc.size(), 0);
 	close(client_fd);
 	epoll_ctl(serv.get_epoll_fd(), EPOLL_CTL_DEL, client_fd, NULL);
 }
@@ -77,6 +83,7 @@ Client::Client(Server &serv)
 	epoll_event	info;
 
 	request = NULL;
+	response = NULL;
 	client_fd = accept(serv.get_server(), NULL, NULL);
 	if (client_fd < 0) 
 	{
@@ -100,4 +107,6 @@ Client::~Client()
 {
 	if (request != NULL)
 		delete request;
+	if (response != NULL)
+		delete response;
 }

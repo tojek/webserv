@@ -15,7 +15,6 @@ void Request::parse_request()
 			body_flag = true;
 			continue ;
 		}
-		std::cout << LIGHT_BLUE <<  line << RESET << std::endl;
 		process_line(line, line_num, body_flag);
 	}	
 }
@@ -54,9 +53,9 @@ void Request::parse_requestline(std::string& line)
 	tokens["method"] = request_line[0];
 	std::cout << LIGHT_BLUE<< "method: "<<RESET << tokens["method"] << std::endl;
 	tokens["request_uri"] = request_line[1];
-	std::cout << LIGHT_BLUE<<"request uri: "<<RESET<<tokens["request_uri"] << std::endl;
+	std::cout << LIGHT_BLUE<<"request_uri: "<<RESET<<tokens["request_uri"] << std::endl;
 	tokens["HTTP_version"] = request_line[2];
-	std::cout << LIGHT_BLUE<<"HTTP version: "<<RESET<<tokens["HTTP_version"] << std::endl;
+	std::cout << LIGHT_BLUE<<"HTTP_version: "<<RESET<<tokens["HTTP_version"] << std::endl;
 }
 
 void Request::parse_header(std::string& line)
@@ -69,6 +68,7 @@ void Request::parse_header(std::string& line)
 	tokens.insert(std::pair<std::string, std::string>(header_line[0], header_line[1]));
 	if (header_line[0].empty())
 		return ;
+	std::cout << LIGHT_BLUE <<  header_line[0] << RESET ": " << tokens[header_line[0]] << std::endl;
 }
 
 void Request::parse_body(std::string& line)
@@ -86,4 +86,24 @@ void Request::parse_body(std::string& line)
 		std::cout << pair[0] << ": "<< RESET << tokens[pair[0]] << std::endl;
 		i++;
 	}
+}
+
+std::string Request::get_method()
+{
+	return (tokens["method"]);
+}
+
+std::string Request::get_request_uri()
+{
+	return (tokens["request_uri"]);
+}
+
+std::string Request::get_host()
+{
+	return (tokens["Host"]);
+}
+
+std::string Request::get_http_version()
+{
+	return (tokens["HTTP_version"]);
 }

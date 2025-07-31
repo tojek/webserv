@@ -19,6 +19,7 @@
 
 class Server;
 class Request;
+class Response;
 
 class Client
 {
@@ -26,6 +27,7 @@ private:
 	int			client_fd;
 	int			blocking_flag;
 	Request		*request;
+	Response	*response;
 public:
 	static int		accept_client(Server &serv);
 	static Client	*find_client(Server &serv, int event_fd);
