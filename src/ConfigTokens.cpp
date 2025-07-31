@@ -12,7 +12,7 @@
 
 #include "ConfigParser.hpp"
 #include "Webserv.hpp"
-#include "Location.hpp" 
+#include "Location.hpp"
 #include <sstream>
 
 void ConfigParser::read_listen(int line_num)
@@ -20,6 +20,8 @@ void ConfigParser::read_listen(int line_num)
 	std::string listen_value;
 	size_t		semicolon_pos = remainder.find(';');
 	size_t		colon_pos;
+	std::string host;
+	int			port;
 
 	if (block_num == 0)
 		parser_error("Not inside server block.", line_num);
@@ -31,9 +33,19 @@ void ConfigParser::read_listen(int line_num)
 
 	colon_pos = listen_value.find(':');
 
-	conf.host = (colon_pos == std::string::npos)? "0.0.0.0" : listen_value.substr(0, colon_pos);
-	conf.port = string_to_int((colon_pos == std::string::npos)? listen_value : listen_value.substr(colon_pos + 1));
-	//listen_configs.push_back(config);
+	// Parse host and port
+	if (colon_pos == std::string::npos) {
+		// Only port specified (e.g., "listen 8080;")
+		host = "0.0.0.0";
+		port = string_to_int(listen_value);
+	} else {
+		// Both host and port specified (e.g., "listen 127.0.0.1:8080;")
+		host = listen_value.substr(0, colon_pos);
+		port = string_to_int(listen_value.substr(colon_pos + 1));
+	}
+
+	// Add to current server's listen configs
+	current_server->listen_configs.push_back(ListenConfig(host, port));
 }
 
 void ConfigParser::read_server_name(int line_num)
@@ -48,7 +60,7 @@ void ConfigParser::read_server_name(int line_num)
 
 	trimmed_name = remainder.substr(0, semicolon_pos);
 	trim_whitespace(trimmed_name);
-	this->conf.server_name = trimmed_name;
+	current_server->server_name = trimmed_name;
 }
 
 void ConfigParser::read_client_max_body_size(int line_num)
@@ -63,7 +75,7 @@ void ConfigParser::read_client_max_body_size(int line_num)
 
 	size_str = remainder.substr(0, semicolon_pos);
 	trim_whitespace(size_str);
-	conf.client_max_body_size = parse_size(size_str);
+	current_server->client_max_body_size = parse_size(size_str);
 }
 
 void ConfigParser::read_error_page(int line_num)
@@ -92,7 +104,7 @@ void ConfigParser::read_error_page(int line_num)
 	trim_whitespace(error_page_path);
 
 	error_code = string_to_int(error_code_str);
-	conf.error_pages[error_code] = error_page_path;
+	current_server->error_pages[error_code] = error_page_path;
 }
 
 void ConfigParser::read_location(int line_num)
@@ -108,7 +120,7 @@ void ConfigParser::read_location(int line_num)
     location_path = remainder.substr(0, open_brace_pos);
     trim_whitespace(location_path);
 
-	conf.locations.push_back(Location(location_path));
+	current_server->locations.push_back(Location(location_path));
     block_num++;
 }
 
@@ -118,6 +130,11 @@ void ConfigParser::read_server(int line_num)
 		parser_error("Server block inside of server block on line: ", line_num);
 	if (remainder != "{")
 		parser_error("Expected 'server {'", line_num);
+
+	// Create a new server configuration
+	servers.push_back(Config());
+	current_server = &servers.back();
+
 	block_num++;
 }
 
@@ -135,7 +152,7 @@ void ConfigParser::read_root(int line_num)
 	trim_whitespace(root_value);
 
 	if (block_num == 2)
-		conf.locations.back().add_token("root", root_value);
+		current_server->locations.back().add_token("root", root_value);
 }
 
 void ConfigParser::read_index(int line_num)
@@ -152,7 +169,7 @@ void ConfigParser::read_index(int line_num)
 	trim_whitespace(index_value);
 
 	if (block_num == 2)
-		conf.locations.back().add_token("index", index_value);
+		current_server->locations.back().add_token("index", index_value);
 }
 
 void ConfigParser::fill_tokens()

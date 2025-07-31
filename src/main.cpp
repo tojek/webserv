@@ -37,13 +37,19 @@ int main(int argc, char *argv[])
 
     try {
         ConfigParser config(config_filepath);
-		
+        const std::vector<Config>& servers = config.get_servers();
+
+        if (servers.empty()) {
+            std::cerr << "Error: No servers configured" << std::endl;
+            return 1;
+        }
+
         setup_signals();
 
-		Server *server = new Server(config.get_config());
-		server->init_epoll();
-		server->event_loop();
-		delete server;
+        Server *server = new Server(servers[0]);
+        server->init_epoll();
+        server->event_loop();
+        delete server;
 
     } catch (const std::exception& e) {
         std::cerr << "Error: " << e.what() << std::endl;

@@ -26,7 +26,7 @@
 Server::~Server()
 {
 	// int opt = 1;
-	
+
 	// setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt));
 	close(server_fd);
 }
@@ -38,17 +38,23 @@ Server::Server(const Config& conf) : conf(conf)
 		error("socket error.");
 	int opt = 1;
 
+	// Use the first listen configuration
+	if (conf.listen_configs.empty())
+		error("No listen configurations found in server block.");
+
+	const ListenConfig& listen_conf = conf.listen_configs[0];
+
 	address.sin_family = AF_INET;
-	address.sin_addr.s_addr = INADDR_ANY;
-	address.sin_port = htons(conf.port);
-	
+	address.sin_addr.s_addr = (listen_conf.host == "0.0.0.0") ? INADDR_ANY : inet_addr(listen_conf.host.c_str());
+	address.sin_port = htons(listen_conf.port);
+
 	setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt));
 	if (bind(server_fd, (struct sockaddr *)&address, sizeof(address)) < 0)
 		error("bind error.");
 	if (listen(server_fd, 10) < 0)
 		error("listen error.");
 	addrlen = sizeof(address);
-	std::cout << "Serwer działa na http://localhost:" << conf.port << std::endl;
+	std::cout << "Serwer działa na http://" << listen_conf.host << ":" << listen_conf.port << std::endl;
 }
 
 void Server::init_epoll()
