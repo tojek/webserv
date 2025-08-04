@@ -56,11 +56,11 @@ void Client::read_request()
 
 void Client::send_response(Server &serv)
 {
-	// (Client *Response response) response = new Response();
 	if (response != NULL)
 		delete response;
 	response = new Response();
 	response->init_response(request, &serv);
+	// next step is dependent on the METHOD
 	std::string resrc = response->make_response();
 
 	send(client_fd, resrc.c_str(), resrc.size(), 0);

@@ -29,7 +29,7 @@
 
 int main(int argc, char *argv[])
 {
-    std::string config_filepath = "default.conf";
+    std::string config_filepath = "def.conf";
 
     if (argc > 1) {
         config_filepath = argv[1];

@@ -43,6 +43,8 @@ public:
 	~Location();
 
 	std::string get_location_path();
+	std::string	get_root();
+	std::string	get_index();
 };
 
 #endif

@@ -83,3 +83,16 @@ std::string Location::get_location_path()
 {
 	return(location_path);
 }
+
+std::string Location::get_index()
+{
+	if (directive.find("index") != directive.end())
+		return directive["index"];
+	else
+		return "index.html"; //hardcoded idk if ok
+}
+
+std::string Location::get_root()
+{
+	return (directive["root"]);
+}
