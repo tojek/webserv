@@ -23,17 +23,20 @@
 #include <sys/epoll.h>
 #include <cstring>
 
+//changed to return client fd after accepting
 int Client::accept_client(Server &serv)
 {
 	Client client(serv);
 	std::map<int, Client> &clients = serv.get_clients();
-	
+
 	if (client.get_client_fd() < 0)
 		return (-1);
 	if (client.get_blocking_flag())
 		return (-1);
-	clients.insert(std::make_pair(client.get_client_fd(), client));
-	return (0);
+
+	int client_fd = client.get_client_fd();
+	clients.insert(std::make_pair(client_fd, client));
+	return (client_fd);  // Return the client fd instead of 0
 }
 
 Client *Client::find_client(Server &serv, int event_fd)
@@ -85,7 +88,7 @@ Client::Client(Server &serv)
 	request = NULL;
 	response = NULL;
 	client_fd = accept(serv.get_server(), NULL, NULL);
-	if (client_fd < 0) 
+	if (client_fd < 0)
 	{
 		perror("accept");
 		return ;

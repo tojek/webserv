@@ -12,6 +12,7 @@
 
 #include "Webserv.hpp"
 #include "Server.hpp"
+#include "ServerManager.hpp"
 #include "Signal.hpp"
 #include "ConfigParser.hpp"
 #include <iostream>
@@ -46,10 +47,9 @@ int main(int argc, char *argv[])
 
         setup_signals();
 
-        Server *server = new Server(servers[0]);
-        server->init_epoll();
-        server->event_loop();
-        delete server;
+        ServerManager manager(config);
+        manager.init_servers();
+        manager.run_single_server();
 
     } catch (const std::exception& e) {
         std::cerr << "Error: " << e.what() << std::endl;
