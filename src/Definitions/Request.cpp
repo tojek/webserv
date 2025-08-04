@@ -50,11 +50,11 @@ void Request::parse_requestline(std::string& line)
 	std::vector<std::string> request_line;
 
 	request_line = ft_split(line, " ");
-	tokens["method"] = request_line[0];
+	tokens.insert(std::pair<std::string, std::string>("method", request_line[0]));
 	std::cout << LIGHT_BLUE<< "method: "<<RESET << tokens["method"] << std::endl;
-	tokens["request_uri"] = request_line[1];
+	tokens.insert(std::pair<std::string, std::string>("request_uri", request_line[1]));
 	std::cout << LIGHT_BLUE<<"request_uri: "<<RESET<<tokens["request_uri"] << std::endl;
-	tokens["HTTP_version"] = request_line[2];
+	tokens.insert(std::pair<std::string, std::string>("HTTP_version", request_line[2]));
 	std::cout << LIGHT_BLUE<<"HTTP_version: "<<RESET<<tokens["HTTP_version"] << std::endl;
 }
 

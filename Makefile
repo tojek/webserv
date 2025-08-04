@@ -14,7 +14,22 @@ CYAN        = \033[0;96m
 # Sources
 SRC_DIR     = ./src/
 OBJ_DIR     = ./obj/
+<<<<<<< HEAD
 SRC_FILES   = Utils.cpp LocationTokens.cpp Definitions/Location.cpp Definitions/Request.cpp Definitions/ConfigParser.cpp Definitions/Server.cpp Definitions/ServerManager.cpp Definitions/Client.cpp Definitions/Signal.cpp ConfigTokens.cpp main.cpp Definitions/Response.cpp
+=======
+SRC_FILES   = Utils.cpp \
+			  LocationTokens.cpp \
+			  Definitions/Location.cpp \
+			  Definitions/Request.cpp \
+			  Definitions/ConfigParser.cpp \
+			  Definitions/Server.cpp \
+			  Definitions/Client.cpp \
+			  Definitions/Signal.cpp \
+			  ConfigTokens.cpp \
+			  main.cpp \
+			  Definitions/Response.cpp\
+			  Methods.cpp
+>>>>>>> zosia
 SRC         = $(addprefix $(SRC_DIR), $(SRC_FILES))
 OBJ         = $(addprefix $(OBJ_DIR), $(SRC_FILES:.cpp=.o))
 

@@ -90,29 +90,29 @@ int make_socket_non_blocking(int fd)
     return fcntl(fd, F_SETFL, flags | O_NONBLOCK);
 }
 
-/**
- * Makes response for the server.
- * 
- * @return Returns response as a string.
- */
-std::string make_response()
-{	
-	std::ifstream index("./static/index.html");
-    std::string html;
-	std::stringstream buffer;
-	std::ostringstream headers;
+// /**
+//  * Makes response for the server.
+//  * 
+//  * @return Returns response as a string.
+//  */
+// std::string make_response()
+// {	
+// 	std::ifstream index("./static/index.html");
+//     std::string html;
+// 	std::stringstream buffer;
+// 	std::ostringstream headers;
 	
-	buffer << index.rdbuf();
-	html = buffer.str();
-    headers << "HTTP/1.1 200 OK\r\n"
-            << "Content-Type: text/html\r\n"
-            << "Content-Length: " << html.size() << "\r\n"
-            << "Connection: close\r\n\r\n"
-            << html;
+// 	buffer << index.rdbuf();
+// 	html = buffer.str();
+//     headers << "HTTP/1.1 200 OK\r\n"
+//             << "Content-Type: text/html\r\n"
+//             << "Content-Length: " << html.size() << "\r\n"
+//             << "Connection: close\r\n\r\n"
+//             << html;
 
-	index.close();
-    return headers.str();
-}
+// 	index.close();
+//     return headers.str();
+// }
 
 /**
  * Splits string by delimiter.
@@ -127,10 +127,15 @@ std::vector<std::string>	ft_split(std::string str, std::string delimiter)
 	std::string					sub;
 	std::vector<std::string>	result;
 
+	if (str[str.size() - 1] == 13)
+		str = str.substr(0, str.size() - 1);
 	while (end != std::string::npos)
 	{
 		end = str.find(delimiter, start);
-		sub = str.substr(start, end - start);
+		if (end == std::string::npos)
+            sub = str.substr(start);
+        else
+            sub = str.substr(start, end - start);
 		start = end + delimiter.size();
 		result.push_back(sub);
 	}

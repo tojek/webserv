@@ -5,7 +5,7 @@
 #include <vector>
 #include <fstream>
 #include <sys/stat.h>
-
+#include <stdlib.h>     // realpath
 #include "Request.hpp"
 #include "Config.hpp"
 #include "Location.hpp"
@@ -30,6 +30,7 @@ class Response
 		std::string request_uri;
 		std::string http_version;
 		std::string	root;
+		std::string	index;
 		std::string code;
 		std::string text;
 		std::string	resource_full_path;
@@ -48,5 +49,9 @@ class Response
 		void		parse_response();
 		// void		read_location_block();
 
-		void		get_method();
+		void		return_method();
+
+		std::string		get_method();
+		std::string		post_method();
+		std::string		delete_method();
 };
