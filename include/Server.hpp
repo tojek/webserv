@@ -37,21 +37,20 @@ private:
 	struct epoll_event	events[10];
 
 	std::map<int, Client> clients;
-	
+
 public:
 	~Server();
 	Server(const Config& conf);
 	Server(Server& serv);
 
 	void		init_epoll();
-	void		event_loop();
 
 	int						get_server();
 	int						get_epoll_fd();
 	sockaddr_in				&get_address();
 	socklen_t				&get_addrlen();
 	epoll_event				&get_info();
-	epoll_event				*get_events();		
+	epoll_event				*get_events();
 	std::map<int, Client>	&get_clients();
 
 	const Config			&get_config();

@@ -12,7 +12,7 @@ class ServerManager
 {
 private:
     std::vector<Server*>            servers;
-    std::vector<Config*>            server_configs;  // Store config pointers to avoid reallocation issues
+    std::vector<Config*>            server_configs;  // listen configs // Store config pointers to avoid reallocation issues
     const ConfigParser&             config_parser;
 
     // Multiple server support
@@ -28,10 +28,12 @@ private:
     Server* find_server_by_host_port(const std::string& host, int port);
 
     // Multiple server helper functions
-    void    initialize_all_servers();
+    // void    initialize_all_servers();
     void    handle_new_connection(int server_fd, Server* server);
     void    handle_client_request(int client_fd, Server* server);
     void    process_events(int num_events);
+
+	void    event_loop();
 
 public:
     ServerManager(const ConfigParser& parser);
@@ -40,7 +42,6 @@ public:
     void    init_servers();
     void    show_status();
     size_t  get_server_count() const;
-    void    run_single_server();  // Simple method to run just the first server
     void    run_multiple_servers();  // New method to run all servers
 };
 

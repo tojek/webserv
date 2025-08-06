@@ -117,30 +117,6 @@ size_t ServerManager::get_server_count() const
     return servers.size();
 }
 
-void ServerManager::run_single_server()
-{
-    if (servers.empty())
-    {
-        std::cerr << "No servers to run!" << std::endl;
-        return;
-    }
-
-    std::cout << "Running only the first server for now..." << std::endl;
-    std::cout << "Press Ctrl+C to stop the server" << std::endl;
-
-    // For now, just run the first server to avoid complexity
-    Server* server = servers[0];
-
-    const Config& config = server->get_config();
-    const ListenConfig& listen_conf = config.listen_configs[0];
-    std::cout << "Starting server on " << listen_conf.host << ":" << listen_conf.port << std::endl;
-
-    server->init_epoll();
-    server->event_loop();
-
-    std::cout << "Server stopped." << std::endl;
-}
-
 void ServerManager::setup_master_epoll()
 {
     master_epoll_fd = epoll_create1(0);
@@ -152,20 +128,6 @@ void ServerManager::setup_master_epoll()
     {
         Server* server = servers[i];
         int server_fd = server->get_server();
-
-		/*
-		*	void Server::init_epoll()
-		*	{
-		*		epoll_fd = epoll_create1(0);
-		*		if (epoll_fd == -1)
-		*			return error("epoll_create error.");
-*
-		*		info.events = EPOLLIN;
-		*		info.data.fd = server_fd;
-		*		if (epoll_ctl(epoll_fd, EPOLL_CTL_ADD, server_fd, &info) == -1)
-		*			return error("epoll_ctl error.");
-		*	}
-		*/
         struct epoll_event ev;
         ev.events = EPOLLIN;
         ev.data.fd = server_fd;
@@ -218,19 +180,19 @@ Server* ServerManager::find_server_by_host_port(const std::string& host, int por
     return NULL;
 }
 
-void ServerManager::initialize_all_servers()
-{
-    std::cout << "Initializing all servers..." << std::endl;
+// void ServerManager::initialize_all_servers()
+// {
+//     std::cout << "Initializing all servers..." << std::endl;
 
-    for (size_t i = 0; i < servers.size(); i++)
-    {
-        servers[i]->init_epoll();
-        const Config& config = servers[i]->get_config();
-        const ListenConfig& listen_conf = config.listen_configs[0];
-        std::cout << "Server " << (i + 1) << " ready on "
-                  << listen_conf.host << ":" << listen_conf.port << std::endl;
-    }
-}
+//     for (size_t i = 0; i < servers.size(); i++)
+//     {
+//         servers[i]->init_epoll();
+//         const Config& config = servers[i]->get_config();
+//         const ListenConfig& listen_conf = config.listen_configs[0];
+//         std::cout << "Server " << (i + 1) << " ready on "
+//                   << listen_conf.host << ":" << listen_conf.port << std::endl;
+//     }
+// }
 
 void ServerManager::handle_new_connection(int server_fd, Server* server)
 {
@@ -289,13 +251,23 @@ void ServerManager::process_events(int num_events)
 
         // Check if this is a server socket (new connection)
         if (fd_to_server_map.find(event_fd) != fd_to_server_map.end())
-        {
             handle_new_connection(event_fd, server);
-        }
         else
-        {
             handle_client_request(event_fd, server);
-        }
+    }
+}
+
+void ServerManager::event_loop()
+{
+    while (g_signal_state.sigint == 0 && g_signal_state.sigterm == 0)
+    {
+        int num_events = epoll_wait(master_epoll_fd, events, 64, -1);
+
+        if (num_events == -1 && errno != EINTR)
+            return error("master epoll_wait error.");
+
+        if (num_events > 0)
+            process_events(num_events);
     }
 }
 
@@ -311,20 +283,9 @@ void ServerManager::run_multiple_servers()
     std::cout << "Running " << servers.size() << " server(s)" << std::endl;
     std::cout << "Press Ctrl+C to stop all servers" << std::endl;
 
-    initialize_all_servers();
+    // initialize_all_servers();
     setup_master_epoll();
-
-    // Main event loop
-    while (g_signal_state.sigint == 0 && g_signal_state.sigterm == 0)
-    {
-        int num_events = epoll_wait(master_epoll_fd, events, 64, -1);
-
-        if (num_events == -1 && errno != EINTR)
-            return error("master epoll_wait error.");
-
-        if (num_events > 0)
-            process_events(num_events);
-    }
+	event_loop();
 
     std::cout << "All servers stopped." << std::endl;
 }

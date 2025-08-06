@@ -69,31 +69,6 @@ void Server::init_epoll()
 		return error("epoll_ctl error.");
 }
 
-void Server::event_loop()
-{
-	Client *client;
-
-	while (g_signal_state.sigint == 0 && g_signal_state.sigterm == 0)
-	{
-		num_of_fds = epoll_wait(epoll_fd, events, 10, -1);
-		if (num_of_fds == -1 && errno != EINTR)
-			return error("epoll_wait error.");
-		for (int x = 0; x < num_of_fds; x++)
-		{
-			if (events[x].data.fd == server_fd)
-				Client::accept_client(*this);
-			else
-			{
-				client = Client::find_client(*this, events[x].data.fd);
-				if (client == NULL)
-					continue ;
-				client->read_request();
-				client->send_response(*this);
-			}
-		}
-	}
-}
-
 int Server::get_server()
 {
 	return (server_fd);
