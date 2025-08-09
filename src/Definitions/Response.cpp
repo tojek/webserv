@@ -56,17 +56,28 @@ void Response::init_response(Request *request, Server *server)
 	location_block = select_location(server_block->locations);
 	init_resource();
 }
+
 // select proper location block in the server block, requires request_uri
-Location	*Response::select_location(std::vector<Location> locations)
+const Location	*Response::select_location(const std::vector<Location> &locations)
 {
 	size_t i = 0;
-	Location *ret;
+	const Location *ret;
+	std::string		uri_path;
+	size_t			pos = 0;
 
+	pos = request_uri.find("/", 1);
+	if (pos == std::string::npos)
+		uri_path = request_uri;
+	else
+		uri_path = request_uri.substr(0, request_uri.size() - pos - 1);
+	std::cout << "uri_path: " << uri_path << std::endl;	
 	while (i < locations.size())
 	{
+		std::cout << "location: " << locations[i].get_location_path() << std::endl;
 		if (locations[i].get_location_path() == "/")
 			ret = &locations[i];
-		if (request_uri == locations[i].get_location_path())
+		else if (uri_path == locations[i].get_location_path())
+		// else if (uri_path.find(locations[i].get_location_path()) != std::string::npos)
 			return (&locations[i]);
 		i++;
 	}
@@ -93,37 +104,22 @@ void	Response::init_host_and_port()
 	}
 }
 
-void	Response::init_resource()
+
+void	Response::get_full_path()
 {
 	char path[1000];
-	
+
+
 	realpath(location_block->get_root().c_str(), path);
 	root = path;
 	index = location_block->get_index();
 	resource_full_path = root + "/" + index;
-	if (access(resource_full_path.c_str(), F_OK) == -1)
-	{
-		code = "500";
-		text = "Internal Server Error";
-		resource_full_path = "./static/500.html";
-	}
-	if (access(resource_full_path.c_str(), R_OK) == -1)
-	{
-		code = "403";
-		text = "Forbidden";
- 	}
-	else
-	{
-		code = "200";
-		text = "OK";
-	}
-	file_content.open(resource_full_path.c_str());
-	std::stringstream buffer;
-	buffer << file_content.rdbuf();
-	resource = buffer.str();
-	content_type = "text/html"; //HARDCODED
 }
-// void	Response::read_location_block()
-// {
 
-// }
+void	Response::init_resource()
+{
+	if (is_cgi()) // should be passed to cgi, not static file handler
+		cgi_handler();
+	else
+		static_file_handler();
+}

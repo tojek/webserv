@@ -42,9 +42,10 @@ public:
 	Location(std::string& location_path);
 	~Location();
 
-	std::string get_location_path();
-	std::string	get_root();
-	std::string	get_index();
+	const std::string get_location_path() const;
+	const std::string	get_root() const;
+	const std::string	get_index() const;
+	const std::string	get_cgi_extension() const;
 };
 
 #endif

@@ -65,10 +65,10 @@ void Client::send_response(Server &serv)
 	response->init_response(request, &serv);
 	// next step is dependent on the METHOD
 	std::string resrc = response->make_response();
-
+	std::cout << "response: " << resrc << std::endl;
 	send(client_fd, resrc.c_str(), resrc.size(), 0);
 	close(client_fd);
-	epoll_ctl(serv.get_epoll_fd(), EPOLL_CTL_DEL, client_fd, NULL);
+	// epoll_ctl(serv.get_epoll_fd(), EPOLL_CTL_DEL, client_fd, NULL);
 }
 
 int	Client::get_client_fd()
@@ -87,6 +87,7 @@ Client::Client(Server &serv)
 
 	request = NULL;
 	response = NULL;
+
 	client_fd = accept(serv.get_server(), NULL, NULL);
 	if (client_fd < 0)
 	{

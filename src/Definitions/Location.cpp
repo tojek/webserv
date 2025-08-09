@@ -79,20 +79,34 @@ Location::~Location()
 	
 }
 
-std::string Location::get_location_path()
+const std::string Location::get_location_path() const
 {
 	return(location_path);
 }
 
-std::string Location::get_index()
+const std::string Location::get_index() const
 {
-	if (directive.find("index") != directive.end())
-		return directive["index"];
+	std::map<std::string, std::string>::const_iterator it = directive.find("index");
+	if (it != directive.end())
+		return it->second;
 	else
 		return "index.html"; //hardcoded idk if ok
 }
 
-std::string Location::get_root()
+const std::string Location::get_root() const
 {
-	return (directive["root"]);
+	std::map<std::string, std::string>::const_iterator it = directive.find("root");
+	if (it != directive.end())
+		return it->second;
+	else
+		return ("");
+}
+
+const std::string	Location::get_cgi_extension() const
+{
+	std::map<std::string, std::string>::const_iterator it = directive.find("cgi_extension");
+	if (it != directive.end())
+		return it->second;
+	else
+		return ("");
 }

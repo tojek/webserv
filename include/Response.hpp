@@ -21,7 +21,7 @@ class Response
 
 		Request			*request;
 		const Config	*server_block;
-		Location		*location_block;
+		const Location		*location_block;
 
 	private:
 		std::string	method;
@@ -38,11 +38,19 @@ class Response
 		std::string content_type;
 		size_t		content_size;
 
+		bool		is_cgi();
+		void		cgi_handler();
+		void		child_process();
+		int			fd[2];
+
+		void		static_file_handler();
+
+		void			get_full_path();
 		struct stat *info;
 		std::ifstream 		file_content;
 		std::ostringstream	response_content;
 
-		Location	*select_location(std::vector<Location> locations);
+		const Location	*select_location(const std::vector<Location> &locations);
 		void		init_host_and_port();
 		void		init_resource();
 		// std::string	make_response();

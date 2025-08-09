@@ -22,7 +22,6 @@
 #include <sys/epoll.h>
 #include <errno.h>
 
-
 Server::~Server()
 {
 	// int opt = 1;
@@ -31,6 +30,7 @@ Server::~Server()
 	close(server_fd);
 }
 
+// serwer nie ma podłączonego epoll fd w klasie -> nie ma go klasa Client
 Server::Server(const Config& conf) : conf(conf)
 {
 	server_fd = socket(AF_INET, SOCK_STREAM, 0);
@@ -57,17 +57,17 @@ Server::Server(const Config& conf) : conf(conf)
 	std::cout << "Serwer działa na http://" << listen_conf.host << ":" << listen_conf.port << std::endl;
 }
 
-void Server::init_epoll()
-{
-	epoll_fd = epoll_create1(0);
-	if (epoll_fd == -1)
-		return error("epoll_create error.");
+// void Server::init_epoll()
+// {
+// 	epoll_fd = epoll_create1(0);
+// 	if (epoll_fd == -1)
+// 		return error("epoll_create error.");
 
-	info.events = EPOLLIN;
-	info.data.fd = server_fd;
-	if (epoll_ctl(epoll_fd, EPOLL_CTL_ADD, server_fd, &info) == -1)
-		return error("epoll_ctl error.");
-}
+// 	info.events = EPOLLIN;
+// 	info.data.fd = server_fd;
+// 	if (epoll_ctl(epoll_fd, EPOLL_CTL_ADD, server_fd, &info) == -1)
+// 		return error("epoll_ctl error.");
+// }
 
 int Server::get_server()
 {
