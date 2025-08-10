@@ -65,7 +65,7 @@ void Client::send_response(Server &serv)
 	response->init_response(request, &serv);
 	// next step is dependent on the METHOD
 	std::string resrc = response->make_response();
-	std::cout << "response: " << resrc << std::endl;
+	// std::cout << "response: " << resrc << std::endl;
 	send(client_fd, resrc.c_str(), resrc.size(), 0);
 	close(client_fd);
 	// epoll_ctl(serv.get_epoll_fd(), EPOLL_CTL_DEL, client_fd, NULL);

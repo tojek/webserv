@@ -70,10 +70,10 @@ const Location	*Response::select_location(const std::vector<Location> &locations
 		uri_path = request_uri;
 	else
 		uri_path = request_uri.substr(0, request_uri.size() - pos - 1);
-	std::cout << "uri_path: " << uri_path << std::endl;	
+	// std::cout << "uri_path: " << uri_path << std::endl;	
 	while (i < locations.size())
 	{
-		std::cout << "location: " << locations[i].get_location_path() << std::endl;
+		// std::cout << "location: " << locations[i].get_location_path() << std::endl;
 		if (locations[i].get_location_path() == "/")
 			ret = &locations[i];
 		else if (uri_path == locations[i].get_location_path())
@@ -107,13 +107,21 @@ void	Response::init_host_and_port()
 
 void	Response::get_full_path()
 {
+	size_t	pos, dot;
 	char path[1000];
 
-
+	pos = request_uri.find_last_of('/');
+	std::string execfile = request_uri.substr(pos + 1);
+	// std::cout << execfile << std::endl;
+	dot = request_uri.find('.');
+	if (dot == std::string::npos)
+		execfile = location_block->get_index();
 	realpath(location_block->get_root().c_str(), path);
 	root = path;
-	index = location_block->get_index();
-	resource_full_path = root + "/" + index;
+	// index = location_block->get_index();
+	resource_full_path = root + "/" + execfile;
+
+	// std::cout << resource_full_path << std::endl;
 }
 
 void	Response::init_resource()
