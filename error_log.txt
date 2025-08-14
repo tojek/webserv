@@ -1,15 +1,25 @@
-==344118== Memcheck, a memory error detector
-==344118== Copyright (C) 2002-2022, and GNU GPL'd, by Julian Seward et al.
-==344118== Using Valgrind-3.22.0 and LibVEX; rerun with -h for copyright info
-==344118== Command: ./webserv
-==344118== 
-==344118== Syscall param epoll_ctl(epfd) contains uninitialised byte(s)
-==344118==    at 0x4C42CFE: epoll_ctl (syscall-template.S:120)
-==344118==    by 0x121509: Client::Client(Server&) (in /home/zosia/common_core/webserv/webserv)
-==344118==    by 0x120F2C: Client::accept_client(Server&) (in /home/zosia/common_core/webserv/webserv)
-==344118==    by 0x11ACB5: ServerManager::handle_new_connection(int, Server*) (in /home/zosia/common_core/webserv/webserv)
-==344118==    by 0x11AF93: ServerManager::process_events(int) (in /home/zosia/common_core/webserv/webserv)
-==344118==    by 0x11B08D: ServerManager::event_loop() (in /home/zosia/common_core/webserv/webserv)
-==344118==    by 0x11B222: ServerManager::run_multiple_servers() (in /home/zosia/common_core/webserv/webserv)
-==344118==    by 0x12633F: main (in /home/zosia/common_core/webserv/webserv)
-==344118== 
+==349515== Memcheck, a memory error detector
+==349515== Copyright (C) 2002-2022, and GNU GPL'd, by Julian Seward et al.
+==349515== Using Valgrind-3.22.0 and LibVEX; rerun with -h for copyright info
+==349515== Command: ./webserv
+==349515== 
+==349515== Syscall param epoll_ctl(epfd) contains uninitialised byte(s)
+==349515==    at 0x4C42CFE: epoll_ctl (syscall-template.S:120)
+==349515==    by 0x121509: Client::Client(Server&) (in /home/zosia/common_core/webserv/webserv)
+==349515==    by 0x120F2C: Client::accept_client(Server&) (in /home/zosia/common_core/webserv/webserv)
+==349515==    by 0x11ACB5: ServerManager::handle_new_connection(int, Server*) (in /home/zosia/common_core/webserv/webserv)
+==349515==    by 0x11AF93: ServerManager::process_events(int) (in /home/zosia/common_core/webserv/webserv)
+==349515==    by 0x11B08D: ServerManager::event_loop() (in /home/zosia/common_core/webserv/webserv)
+==349515==    by 0x11B222: ServerManager::run_multiple_servers() (in /home/zosia/common_core/webserv/webserv)
+==349515==    by 0x12633F: main (in /home/zosia/common_core/webserv/webserv)
+==349515== 
+Traceback (most recent call last):
+  File "/home/zosia/common_core/webserv/cgi-bin/upload.py", line 8, in <module>
+    content_length = int(os.environ.get("CONTENT_LENGTH", 0))
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ValueError: invalid literal for int() with base 10: ''
+Traceback (most recent call last):
+  File "/home/zosia/common_core/webserv/cgi-bin/upload.py", line 8, in <module>
+    content_length = int(os.environ.get("CONTENT_LENGTH", 0))
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ValueError: invalid literal for int() with base 10: ''
