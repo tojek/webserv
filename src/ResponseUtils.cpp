@@ -22,46 +22,54 @@ void	Response::cgi_handler()
 	pid_t	pid;
 	std::stringstream buf;
 
-	pipe(fd);
+	pipe(pipe_out);
+	pipe(pipe_in);
 	pid = fork();
 	if (pid == 0)
 		child_process();
 	else // server parent 
 	{
-		close(fd[1]);
+		std::cout << PINK"body size: " << RESET << body.size() << std::endl;
+		close(pipe_out[1]);
+		close(pipe_in[0]);
+
    	 	char buffer[4096];
     	ssize_t bytes;
-    	while ((bytes = read(fd[0], buffer, sizeof(buffer))) > 0) 
+		write(pipe_in[1], body.c_str(), body.size());
+		close(pipe_in[1]);
+    	while ((bytes = read(pipe_out[0], buffer, sizeof(buffer))) > 0) 
 			buf.write(buffer, bytes);
 		resource = buf.str();
-		content_type = "text/plain"; // needs to be a function
-    	close(fd[0]);
+		content_type = "text/html"; // needs to be a function
+    	close(pipe_out[0]);
    		waitpid(pid, NULL, 0);
 	}
 }
 
 void	Response::child_process()
 {
-	size_t	pos;
-	char path[1000];
+	// std::cout << "DEBUG: content_type=" << request->get_content_type() << std::endl;
+	// std::cout << "DEBUG: content_size=" << request->get_content_size() << std::endl;
+	get_full_path();
 
-	pos = request_uri.find_last_of('/');
-	std::string execfile = request_uri.substr(pos + 1);
-	// std::cout << execfile << std::endl;
-	realpath(location_block->get_root().c_str(), path);
-	root = path;
-	// index = location_block->get_index();
-	resource_full_path = root + "/" + execfile;
-
-	std::cout << resource_full_path << std::endl;
-	close(fd[0]);
-	dup2(fd[1], STDOUT_FILENO);
-	close(fd[1]);
+	close(pipe_in[1]);
+	dup2(pipe_in[0], STDIN_FILENO);
+	close(pipe_in[0]);
+	// std::cout << resource_full_path << std::endl;
+	close(pipe_out[0]);
+	dup2(pipe_out[1], STDOUT_FILENO);
+	close(pipe_out[1]);
 	char *argv[] = { const_cast<char*>(resource_full_path.c_str()), NULL };
 	// Prepare envp array for execve:
-	char *envp[] = { NULL };
+	set_up_envp();
 	execve(resource_full_path.c_str(), argv, envp);
-
+	if (envp != NULL) {
+		for (size_t i = 0; envp[i] != NULL; ++i) {
+			free(envp[i]);
+		}
+		delete[] envp;
+		envp = NULL;
+	}
 }
 
 void	Response::static_file_handler()
@@ -89,4 +97,48 @@ void	Response::static_file_handler()
 	buffer << file_content.rdbuf();
 	resource = buffer.str();
 	content_type = "text/html"; // needs to be a function
+}
+
+// necessary to select proper server block context
+// void	Response::init_host_and_port()
+// {
+// 	std::vector<std::string>	vec_host_port;
+// 	std::string					host_port;
+
+// 	host_port = request->get_host();
+// 	if (host_port.find(":") == std::string::npos)
+// 	{
+// 		host = host_port;
+// 		port = "80";
+// 	}
+// 	else
+// 	{
+// 		vec_host_port = ft_split(request->get_host(), ":");
+// 		host = vec_host_port[0];
+// 		port = vec_host_port[1];
+// 	}
+// }
+
+void	Response::set_up_envp()
+{
+	std::vector<std::string> env_vars;
+	char path[1000];
+	realpath("./uploads", path);
+	std::string upload_path = path;
+	env_vars.push_back("REQUEST_METHOD=" + request->get_method());
+	env_vars.push_back("SCRIPT_FILENAME=" + resource_full_path);
+	env_vars.push_back("UPLOAD_DIR=" + upload_path);
+	env_vars.push_back("QUERY_STRING=");
+	env_vars.push_back("CONTENT_TYPE=" + request->get_content_type());
+	env_vars.push_back("CONTENT_LENGTH=" + request->get_content_size());
+	env_vars.push_back("GATEWAY_INTERFACE=CGI/1.1");
+	env_vars.push_back("SERVER_PROTOCOL=HTTP/1.1");
+	env_vars.push_back("SERVER_SOFTWARE=MyCppServer/1.0");
+
+	// Allocate char* array
+	envp = new char*[env_vars.size() + 1];
+	for (size_t i = 0; i < env_vars.size(); i++) {
+		envp[i] = strdup(env_vars[i].c_str()); // duplicate string to char*
+	}
+	envp[env_vars.size()] = NULL; // null-terminate array
 }

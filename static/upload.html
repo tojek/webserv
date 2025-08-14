@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Upload Files</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #fff9d9;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+    }
+    .upload-box {
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      text-align: center;
+      max-width: 300px;
+      width: 100%;
+    }
+    h1 {
+      font-size: 1.2rem;
+      margin-bottom: 10px;
+    }
+    input[type=file] {
+      margin: 15px 0;
+    }
+    button {
+      background-color: #ffd166;
+      border: none;
+      padding: 10px 15px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    button:hover {
+      background-color: #ffbf47;
+    }
+  </style>
+</head>
+<body>
+  <div class="upload-box">
+    <h1>Select your files</h1>
+    <form action="/cgi-bin/upload.py" method="post" enctype="multipart/form-data">
+      <input type="file" name="files" multiple>
+      <br>
+      <button type="submit">Upload</button>
+    </form>
+  </div>
+</body>
+</html>

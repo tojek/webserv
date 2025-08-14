@@ -46,12 +46,10 @@ std::string	Response::make_response()
 void Response::init_response(Request *request, Server *server)
 {
 	this->request = request;
+	body = request->get_body();
 	method = request->get_method();
 	request_uri = request->get_request_uri();
 	http_version = request->get_http_version();
-	init_host_and_port();
-	// @param server_block needs to be selected from the Server class but
-	// for now we are using default config node (required Host and Port from request)
 	server_block = &server->get_config();
 	location_block = select_location(server_block->locations);
 	init_resource();
@@ -69,41 +67,17 @@ const Location	*Response::select_location(const std::vector<Location> &locations
 	if (pos == std::string::npos)
 		uri_path = request_uri;
 	else
-		uri_path = request_uri.substr(0, request_uri.size() - pos - 1);
-	// std::cout << "uri_path: " << uri_path << std::endl;	
+		uri_path = request_uri.substr(0, pos);
 	while (i < locations.size())
 	{
-		// std::cout << "location: " << locations[i].get_location_path() << std::endl;
 		if (locations[i].get_location_path() == "/")
 			ret = &locations[i];
 		else if (uri_path == locations[i].get_location_path())
-		// else if (uri_path.find(locations[i].get_location_path()) != std::string::npos)
 			return (&locations[i]);
 		i++;
 	}
 	return (ret);
 }
-
-// necessary to select proper server block context
-void	Response::init_host_and_port()
-{
-	std::vector<std::string>	vec_host_port;
-	std::string					host_port;
-
-	host_port = request->get_host();
-	if (host_port.find(":") == std::string::npos)
-	{
-		host = host_port;
-		port = "80";
-	}
-	else
-	{
-		vec_host_port = ft_split(request->get_host(), ":");
-		host = vec_host_port[0];
-		port = vec_host_port[1];
-	}
-}
-
 
 void	Response::get_full_path()
 {
@@ -112,16 +86,12 @@ void	Response::get_full_path()
 
 	pos = request_uri.find_last_of('/');
 	std::string execfile = request_uri.substr(pos + 1);
-	// std::cout << execfile << std::endl;
 	dot = request_uri.find('.');
 	if (dot == std::string::npos)
 		execfile = location_block->get_index();
 	realpath(location_block->get_root().c_str(), path);
 	root = path;
-	// index = location_block->get_index();
 	resource_full_path = root + "/" + execfile;
-
-	// std::cout << resource_full_path << std::endl;
 }
 
 void	Response::init_resource()

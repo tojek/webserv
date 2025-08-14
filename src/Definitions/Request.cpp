@@ -1,8 +1,8 @@
 #include "../include/Request.hpp"
 
-void Request::parse_request()
+void Request::parse_request(std::string headers)
 {
-	std::istringstream	stream(buffer);
+	std::istringstream	stream(headers);
     std::string			line;
 	size_t 				line_num = 0;
 	bool				body_flag = false;
@@ -26,6 +26,7 @@ Request::Request()
 
 Request::Request(int client_fd)
 {
+	this->client_fd = client_fd;
 	std::memset(buffer, 0, sizeof(buffer));
 	read(client_fd, buffer, sizeof(buffer) - 1);
 }
@@ -88,6 +89,20 @@ void Request::parse_body(std::string& line)
 	}
 }
 
+void Request::extract_raw_body()
+{
+    std::string headers;
+	headers = buffer;
+     size_t pos = headers.find("\r\n\r\n");
+     if (pos != std::string::npos) {
+        std::string header_part = headers.substr(0, pos + 4);
+        parse_request(header_part);
+        body = headers.substr(pos + 4);
+		std::cout << PINK "body: " RESET<<body << std::endl;
+		std::cout << PINK "body size: " RESET << body.size() << std::endl;
+	}
+}
+
 std::string Request::get_method()
 {
 	return (tokens["method"]);
@@ -106,4 +121,19 @@ std::string Request::get_host()
 std::string Request::get_http_version()
 {
 	return (tokens["HTTP_version"]);
+}
+
+std::string Request::get_content_size()
+{
+	return (tokens["Content-Length"]);
+}
+
+std::string Request::get_content_type()
+{
+	return (tokens["Content-Type"]);
+}
+
+std::string	Request::get_body()
+{
+	return (body);
 }

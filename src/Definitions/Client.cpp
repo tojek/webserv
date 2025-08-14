@@ -54,7 +54,7 @@ void Client::read_request()
 	if (request != NULL)
 		delete request;
 	request = new Request(client_fd);
-	request->parse_request();
+	request->extract_raw_body();
 }
 
 void Client::send_response(Server &serv)
