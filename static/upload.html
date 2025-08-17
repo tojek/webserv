@@ -27,8 +27,12 @@
       font-size: 1.2rem;
       margin-bottom: 10px;
     }
-    input[type=file] {
-      margin: 15px 0;
+    input[type=text], input[type=file] {
+      margin: 10px 0;
+      width: 90%;
+      padding: 8px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
     }
     button {
       background-color: #ffd166;
@@ -47,6 +51,8 @@
   <div class="upload-box">
     <h1>Select your files</h1>
     <form action="/cgi-bin/upload.py" method="post" enctype="multipart/form-data">
+      <input type="text" name="custom_name" placeholder="Custom File Name">
+      <br>
       <input type="file" name="files" multiple>
       <br>
       <button type="submit">Upload</button>
