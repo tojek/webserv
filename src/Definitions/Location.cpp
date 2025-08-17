@@ -72,11 +72,11 @@ Location::Location(std::string& location_path)
 
 Location::Location()
 {
-	
+
 }
 Location::~Location()
 {
-	
+
 }
 
 const std::string Location::get_location_path() const
@@ -105,6 +105,15 @@ const std::string Location::get_root() const
 const std::string	Location::get_cgi_extension() const
 {
 	std::map<std::string, std::string>::const_iterator it = directive.find("cgi_extension");
+	if (it != directive.end())
+		return it->second;
+	else
+		return ("");
+}
+
+const std::string Location::get_directory_listing() const
+{
+	std::map<std::string, std::string>::const_iterator it = directive.find("directory_listing");
 	if (it != directive.end())
 		return it->second;
 	else

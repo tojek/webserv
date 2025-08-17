@@ -23,7 +23,7 @@ class Location
 private:
 	std::string														location_path;
 	std::map<std::string, std::string> 								directive;
-	
+
 	std::map<std::string, void (Location::*)(int, std::string&)>	tokens;
 
 	void    read_upload_dir(int line_num, std::string& reminder);
@@ -37,15 +37,16 @@ private:
 public:
 	void	add_token(std::string token, std::string& value);
 	void	find_token(int line_num, std::string& token, std::string& reminder);
-	
+
 	Location();
 	Location(std::string& location_path);
 	~Location();
 
-	const std::string get_location_path() const;
+	const std::string	get_location_path() const;
 	const std::string	get_root() const;
 	const std::string	get_index() const;
 	const std::string	get_cgi_extension() const;
+	const std::string	get_directory_listing() const;
 };
 
 #endif

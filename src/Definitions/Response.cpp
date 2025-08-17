@@ -4,12 +4,12 @@
 // NIE USUWAĆ KOMENTARZY I STD COUT !!!! :(
 
 // std::string Response::make_response()
-// {	
+// {
 // 	std::ifstream index("./static/index.html");
 //     std::string html;
 // 	std::stringstream buffer;
 // 	std::ostringstream headers;
-	
+
 // 	buffer << index.rdbuf();
 // 	html = buffer.str();
 //     headers << "HTTP/1.1 200 OK\r\n"
@@ -79,6 +79,7 @@ const Location	*Response::select_location(const std::vector<Location> &locations
 	return (ret);
 }
 
+// 
 void	Response::get_full_path()
 {
 	size_t	pos, dot;
@@ -87,11 +88,14 @@ void	Response::get_full_path()
 	pos = request_uri.find_last_of('/');
 	std::string execfile = request_uri.substr(pos + 1);
 	dot = request_uri.find('.');
-	if (dot == std::string::npos)
-		execfile = location_block->get_index();
+
 	realpath(location_block->get_root().c_str(), path);
 	root = path;
-	resource_full_path = root + "/" + execfile;
+
+	if (dot == std::string::npos && execfile.empty()) // directory request
+		resource_full_path = root;
+	else // it's a file request
+		resource_full_path = root + "/" + execfile;
 }
 
 void	Response::init_resource()
