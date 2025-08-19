@@ -8,6 +8,8 @@
 
 #include "Server.hpp"
 #include "Webserv.hpp"
+#include "Debug.hpp"
+
 #include <iostream>
 #include <string>
 #include <sstream>

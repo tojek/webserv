@@ -119,3 +119,12 @@ const std::string Location::get_directory_listing() const
 	else
 		return ("");
 }
+
+const std::string Location::get_allowed_methods() const
+{
+	std::map<std::string, std::string>::const_iterator it = directive.find("allowed_methods");
+	if (it != directive.end())
+		return it->second;
+	else
+		return ("");
+}

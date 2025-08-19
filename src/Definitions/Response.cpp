@@ -1,46 +1,24 @@
 #include "Response.hpp"
 
 
-// NIE USUWAĆ KOMENTARZY I STD COUT !!!! :(
-
-// std::string Response::make_response()
-// {
-// 	std::ifstream index("./static/index.html");
-//     std::string html;
-// 	std::stringstream buffer;
-// 	std::ostringstream headers;
-
-// 	buffer << index.rdbuf();
-// 	html = buffer.str();
-//     headers << "HTTP/1.1 200 OK\r\n"
-//             << "Content-Type: text/html\r\n"
-//             << "Content-Length: " << html.size() << "\r\n"
-//             << "Connection: close\r\n\r\n"
-//             << html;
-
-// 	index.close();
-//     return headers.str();
-// }
-
 Response::Response() {}
 
 Response::~Response() {}
 
 std::string	Response::make_response()
 {
-	int	i = 0;
-	std::string	methods[] = {"GET", "POST", "DELETE"};
-	std::string (Response::*functions[])() = {&Response::get_method, &Response::post_method, &Response::delete_method};
+	std::ostringstream headers;
 
-	while (i < 3)
-	{
-		if (method == methods[i])
-		{
-			return (this->*(functions[i]))();
-		}
-		i++;
-	}
-	return ("");
+	// get content type of output
+	content_type = get_content_type();
+
+	headers << http_version << " " << code << " " << text << "\r\n";
+	if (content_type != "")
+			headers << "Content-Type: " << content_type << "\r\n";
+	headers << "Content-Length: " << resource.size() << "\r\n"
+			<< "Connection: close \r\n\r\n"
+			<< resource;
+	return (headers.str());
 }
 
 void Response::init_response(Request *request, Server *server)
@@ -55,7 +33,6 @@ void Response::init_response(Request *request, Server *server)
 	init_resource();
 }
 
-// select proper location block in the server block, requires request_uri
 const Location	*Response::select_location(const std::vector<Location> &locations)
 {
 	size_t i = 0;
@@ -95,13 +72,57 @@ void	Response::get_full_path()
 	if (dot == std::string::npos && execfile.empty()) // directory request
 		resource_full_path = root;
 	else // it's a file request
-		resource_full_path = root + "/" + execfile;
+		resource_full_path = root + request_uri;
+	// Debug::display1("full path", resource_full_path);
 }
 
 void	Response::init_resource()
 {
-	if (is_cgi()) // should be passed to cgi, not static file handler
+	if (is_cgi() && method != "DELETE")
 		cgi_handler();
 	else
 		static_file_handler();
+}
+
+std::string	Response::get_content_type()
+{
+	size_t		pos;
+	std::string ext;
+	std::string	cont_type;
+
+	if (is_cgi())
+		return (cgi_content_type());
+	set_up_contenttypes();
+	pos = resource_full_path.find_last_of(".");
+	if (pos != std::string::npos)
+		ext = resource_full_path.substr(pos);
+	else
+		ext = "";
+	if (cont_types.find(ext) != cont_types.end())
+		cont_type = cont_types[ext];
+	else
+		cont_type = "text/html";
+	return (cont_type);
+}
+
+void	Response::set_up_contenttypes()
+{	
+	cont_types[".txt"] = "text/plain";
+	cont_types[".html"] = "text/html";
+	cont_types[".csv"] = "text/csv";
+	cont_types[".js"] = "text/javascript";
+	cont_types[".xml"] = "text/xml";
+	cont_types[".jpeg"] = "image/jpeg";
+	cont_types[".jpg"] = "image/jpeg";
+	cont_types[".png"] = "image/png";
+	cont_types[".gif"] = "image/gif";
+	cont_types[".tiff"] = "image/tiff";
+	cont_types[".tif"] = "image/tiff";
+	cont_types[".djvu"] = "image/vnd.djvu";
+	cont_types[".json"] = "application/json";
+	cont_types[".zip"] = "application/zip";
+	cont_types["tif"] = "image/tiff";
+	cont_types["djvu"] = "image/vnd.djvu";
+	cont_types["json"] = "application/json";
+	cont_types["zip"] = "application/zip";
 }

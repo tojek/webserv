@@ -53,6 +53,7 @@ print("<html><head><title>Upload Result</title></head>")
 print("<body style='font-family:sans-serif;background-color:#fff9d9;padding:20px;'>")
 
 if saved_files:
+    print("""<!-- Content-Type: text/html -->""")
     print("<div style='background-color:#fff8dc;padding:20px;border-radius:5px;'>")
     print("<h1>Upload Successful!</h1>")
     print("<ul>")

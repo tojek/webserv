@@ -1,4 +1,5 @@
-#include "../include/Request.hpp"
+#include "Request.hpp"
+#include "Debug.hpp"
 
 void Request::parse_request(std::string headers)
 {
@@ -52,11 +53,10 @@ void Request::parse_requestline(std::string& line)
 
 	request_line = ft_split(line, " ");
 	tokens.insert(std::pair<std::string, std::string>("method", request_line[0]));
-	std::cout << LIGHT_BLUE<< "method: "<<RESET << tokens["method"] << std::endl;
 	tokens.insert(std::pair<std::string, std::string>("request_uri", request_line[1]));
-	std::cout << LIGHT_BLUE<<"request_uri: "<<RESET<<tokens["request_uri"] << std::endl;
 	tokens.insert(std::pair<std::string, std::string>("HTTP_version", request_line[2]));
-	std::cout << LIGHT_BLUE<<"HTTP_version: "<<RESET<<tokens["HTTP_version"] << std::endl;
+	
+	Debug::display_trace(tokens);
 }
 
 void Request::parse_header(std::string& line)
@@ -69,7 +69,6 @@ void Request::parse_header(std::string& line)
 	tokens.insert(std::pair<std::string, std::string>(header_line[0], header_line[1]));
 	if (header_line[0].empty())
 		return ;
-	std::cout << LIGHT_BLUE <<  header_line[0] << RESET ": " << tokens[header_line[0]] << std::endl;
 }
 
 void Request::parse_body(std::string& line)
@@ -84,7 +83,6 @@ void Request::parse_body(std::string& line)
 	{
 		pair = ft_split(body_pairs[i], "=");
 		tokens[pair[0]] = pair[1];
-		std::cout << pair[0] << ": "<< RESET << tokens[pair[0]] << std::endl;
 		i++;
 	}
 }
@@ -98,8 +96,6 @@ void Request::extract_raw_body()
         std::string header_part = headers.substr(0, pos + 4);
         parse_request(header_part);
         body = headers.substr(pos + 4);
-		std::cout << PINK "body: " RESET<<body << std::endl;
-		std::cout << PINK "body size: " RESET << body.size() << std::endl;
 	}
 }
 

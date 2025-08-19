@@ -47,6 +47,7 @@ public:
 	const std::string	get_index() const;
 	const std::string	get_cgi_extension() const;
 	const std::string	get_directory_listing() const;
+	const std::string	get_allowed_methods() const;
 };
 
 #endif

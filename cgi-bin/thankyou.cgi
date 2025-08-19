@@ -1,12 +1,9 @@
 #!/usr/bin/env python3
 
-import cgi
-import cgitb
 import sys
 import os
 
 # Enable debugging
-cgitb.enable()
 
 # Read POST data from stdin if any
 length = os.environ.get('CONTENT_LENGTH')
@@ -29,6 +26,7 @@ if post_data:
 
 
 # Output HTML page
+print("""<!-- Content-Type: text/html -->""")
 print(f"""<!DOCTYPE html>
 <html lang="en">
 <head>
