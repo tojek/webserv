@@ -26,6 +26,7 @@ private:
     void    setup_master_epoll();
     Server* find_server_by_fd(int fd);
     Server* find_server_by_host_port(const std::string& host, int port);
+    bool server_exists_for_port(const std::string& host, int port);
 
     // Multiple server helper functions
     // void    initialize_all_servers();

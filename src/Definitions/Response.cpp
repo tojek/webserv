@@ -1,6 +1,5 @@
 #include "Response.hpp"
 
-
 Response::Response() {}
 
 Response::~Response() {}
@@ -56,7 +55,6 @@ const Location	*Response::select_location(const std::vector<Location> &locations
 	return (ret);
 }
 
-// 
 void	Response::get_full_path()
 {
 	size_t	pos, dot;
@@ -106,7 +104,7 @@ std::string	Response::get_content_type()
 }
 
 void	Response::set_up_contenttypes()
-{	
+{
 	cont_types[".txt"] = "text/plain";
 	cont_types[".html"] = "text/html";
 	cont_types[".csv"] = "text/csv";

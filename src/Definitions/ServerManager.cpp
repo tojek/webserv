@@ -54,8 +54,34 @@ void ServerManager::create_servers_from_config(const Config& config, size_t conf
     for (size_t j = 0; j < config.listen_configs.size(); j++)
     {
         const ListenConfig& listen_conf = config.listen_configs[j];
-        create_single_server(config, listen_conf);
+
+        // Check if we already have a server for this host:port
+        if (!server_exists_for_port(listen_conf.host, listen_conf.port))
+        {
+            create_single_server(config, listen_conf);
+        }
+        else
+        {
+            std::cout << "Server already exists for " << listen_conf.host
+                     << ":" << listen_conf.port << " - skipping socket creation" << std::endl;
+        }
     }
+}
+
+bool ServerManager::server_exists_for_port(const std::string& host, int port)
+{
+    for (size_t i = 0; i < servers.size(); i++)
+    {
+        const Config& config = servers[i]->get_config();
+        if (!config.listen_configs.empty())
+        {
+            const ListenConfig& listen_conf = config.listen_configs[0];
+            if (listen_conf.port == port &&
+                (listen_conf.host == host || listen_conf.host == "0.0.0.0" || host == "0.0.0.0"))
+                return true;
+        }
+    }
+    return false;
 }
 
 void ServerManager::create_single_server(const Config& config, const ListenConfig& listen_conf)

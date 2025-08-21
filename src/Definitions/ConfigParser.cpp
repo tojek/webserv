@@ -183,7 +183,10 @@ bool ConfigParser::server_matches_port(const Config& server, int port) const
 
 /**
  * Find the appropriate server configuration based on host and port.
- * Uses a three-tier selection strategy: exact match -> port match -> first server.
+ * 1. Exact server_name match for host:port
+ * 2. First server that listens on exact host:port (default for that host:port)
+ * 3. First server that listens on port (any host)
+ * 4. First server overall
  */
 const Config* ConfigParser::find_server(const std::string& host, int port) const
 {
@@ -192,16 +195,25 @@ const Config* ConfigParser::find_server(const std::string& host, int port) const
 	if (servers.empty())
 		return NULL;
 
-	// Exact host:port match
+	// 1. Exact server_name match for host:port
+	for (it = servers.begin(); it != servers.end(); ++it)
+	{
+		if (server_matches_exact(*it, host, port) &&
+			!it->server_name.empty() &&
+			it->server_name == host)
+			return &(*it);
+	}
+
+	// 2. First server that listens on exact host:port (default for this host:port)
 	for (it = servers.begin(); it != servers.end(); ++it)
 		if (server_matches_exact(*it, host, port))
 			return &(*it);
 
-	// Port-only match
+	// 3. First server that listens on port (any host)
 	for (it = servers.begin(); it != servers.end(); ++it)
 		if (server_matches_port(*it, port))
 			return &(*it);
 
-	// Default fallback
+	// 4. First server overall (ultimate fallback)
 	return &servers[0];
 }
