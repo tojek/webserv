@@ -11,6 +11,8 @@ void	Response::static_file_handler()
 	get_full_path();
 
 	// Check if path exists
+	if (!is_method_allowed())
+		return ;
 	if (access(resource_full_path.c_str(), F_OK) == -1)
 	{
 		set_status_line("404", "Not Found");
@@ -133,13 +135,8 @@ std::string	Response::generate_directory_listing(const std::string& dir_path)
 
 void	Response::delete_method()
 {
-	std::string methods = location_block->get_allowed_methods();
-	if (methods.find("DELETE") == std::string::npos)
-	{
-		resource = "<html><body><h1>405 Method Not Allowed</h1></body></html>";
-		set_status_line("405", "Method Not Allowed");
+	if (!is_method_allowed())
 		return ;
-	}
 	if (std::remove(resource_full_path.c_str()) == -1)
 	{
 		resource = "<html><body><h1>403 Forbidden</h1></body></html>";
@@ -158,4 +155,17 @@ void	Response::set_status_line(std::string code, std::string text)
 {
 	this->code = code;
 	this->text = text;
+}
+
+int	Response::is_method_allowed()
+{
+	std::string methods = location_block->get_allowed_methods();
+	
+	if (methods.find(method) == std::string::npos)
+	{
+		resource = "<html><body><h1>405 Method Not Allowed</h1></body></html>";
+		set_status_line("405", "Method Not Allowed");
+		return (0);
+	}
+	return (1);
 }
