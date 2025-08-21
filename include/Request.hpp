@@ -41,7 +41,7 @@ class Request
 		~Request();
 
 		void		parse_request(std::string headers);
-		void		extract_raw_body();
+		void		chunked_request_parser(std::string raw_request, size_t pos);
 
 		std::string	get_body();
 		std::string	get_method();

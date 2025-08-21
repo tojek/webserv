@@ -7,17 +7,30 @@ Response::~Response() {}
 std::string	Response::make_response()
 {
 	std::ostringstream headers;
+	time_t timestamp = time(NULL);
+	char date_str[100];
 
 	// get content type of output
 	content_type = get_content_type();
 
-	headers << http_version << " " << code << " " << text << "\r\n";
-	if (content_type != "")
-			headers << "Content-Type: " << content_type << "\r\n";
-	headers << "Content-Length: " << resource.size() << "\r\n"
-			<< "Connection: close \r\n\r\n"
-			<< resource;
-	return (headers.str());
+	std::strftime(date_str, sizeof(date_str), "%a %b %d %H:%M:%S %Y", std::localtime(&timestamp));
+	headers << "HTTP/1.1 " << code << " " << text << "\r\n"
+		<< "Server: SeriousServer\r\n" 
+		<< "Date: " << date_str << "\r\n"
+		<< "Content-Type: " << content_type << "\r\n"
+		<< "Content-Length: " << resource.size() << "\r\n"
+		<< "Connection: keep-alive\r\n\r\n"
+		<< resource;
+
+
+	std::cout << "HTTP/1.1 " << code << " " << text << "\r\n"
+		<< "Server: SeriousServer\r\n" 
+		<< "Date: " << date_str << "\r\n"
+		<< "Content-Type: " << content_type << "\r\n"
+		<< "Content-Length: " << resource.size() << "\r\n"
+		<< "Connection: keep-alive\r\n\r\n";
+		
+		return (headers.str());
 }
 
 void Response::init_response(Request *request, Server *server)

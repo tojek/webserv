@@ -10,6 +10,7 @@
 #include "Config.hpp"
 #include "Location.hpp"
 #include <dirent.h> // read dir listing
+#include <ctime>
 
 class Response
 {
@@ -57,7 +58,7 @@ class Response
 		struct stat 		*info;
 		std::ifstream 		file_content;
 		std::ostringstream	response_content;
-
+		int					is_method_allowed();
 		const Location		*select_location(const std::vector<Location> &locations);
 		void				init_resource();
 		void				set_status_line(std::string code, std::string text);
