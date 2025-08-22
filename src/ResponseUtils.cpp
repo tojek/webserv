@@ -35,19 +35,26 @@ struct stat {
 
 	if (S_ISDIR(path_stat.st_mode))
 	{
-		if (location_block->get_directory_listing() == "on")
+		// Try to serve index file first
+		std::string index_path = resource_full_path + "/" + location_block->get_index();
+
+		//serve index
+		if (access(index_path.c_str(), F_OK) == 0)
+			resource_full_path = index_path;
+		else if (location_block->get_directory_listing() == "on")
 		{
 			set_status_line("200", "OK");
 			resource = generate_directory_listing(resource_full_path);
 			content_type = "text/html";
+			return;
 		}
 		else
 		{
 			set_status_line("403", "Forbidden");
 			resource = "<html><body><h1>403 Forbidden</h1></body></html>";
 			content_type = "text/html";
+			return;
 		}
-		return;
 	}
 
 	// Regular file: check if readable and give
@@ -160,7 +167,7 @@ void	Response::set_status_line(std::string code, std::string text)
 int	Response::is_method_allowed()
 {
 	std::string methods = location_block->get_allowed_methods();
-	
+
 	if (methods.find(method) == std::string::npos)
 	{
 		resource = "<html><body><h1>405 Method Not Allowed</h1></body></html>";
