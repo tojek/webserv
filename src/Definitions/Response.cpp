@@ -145,14 +145,13 @@ std::string Response::get_error_page(int error_code)
 
 	if (it != server_block->error_pages.end())
 	{
-		// Get the error page path and resolve it with current location's root
 		std::string error_page_path = it->second;
 		std::string full_path;
 
-		// Use current location's root (same as regular file serving)
-		char resolved_root[1000];
-		realpath(location_block->get_root().c_str(), resolved_root);
-		full_path = std::string(resolved_root) + error_page_path;
+		// same as regular file serving
+		char new_root[1000];
+		realpath(location_block->get_root().c_str(), new_root);
+		full_path = std::string(new_root) + error_page_path;
 
 		// Try to read the error page file
 		std::ifstream error_file(full_path.c_str());
@@ -167,7 +166,7 @@ std::string Response::get_error_page(int error_code)
 		}
 	}
 
-	// Fall back to simple default error page using the status text
+	// Fallback to default
 	return get_default_error_page();
 }
 
