@@ -18,17 +18,21 @@ std::string	Response::make_response()
 		<< "Server: SeriousServer\r\n"
 		<< "Date: " << date_str << "\r\n"
 		<< "Content-Type: " << content_type << "\r\n"
-		<< "Content-Length: " << resource.size() << "\r\n"
-		<< "Connection: keep-alive\r\n\r\n"
-		<< resource;
+		<< "Content-Length: " << resource.size() << "\r\n";
+		if (is_redirection == true)
+			headers << "Location: " << redir_location << "\r\n";
+		headers << "Connection: keep-alive\r\n\r\n";
+		headers << resource;
 
 
 	std::cout << "HTTP/1.1 " << code << " " << text << "\r\n"
 		<< "Server: SeriousServer\r\n"
 		<< "Date: " << date_str << "\r\n"
 		<< "Content-Type: " << content_type << "\r\n"
-		<< "Content-Length: " << resource.size() << "\r\n"
-		<< "Connection: keep-alive\r\n\r\n";
+		<< "Content-Length: " << resource.size() << "\r\n";
+		if (is_redirection == true)
+			std::cout << "Location: " << redir_location << "\r\n";
+		std::cout << "Connection: keep-alive\r\n\r\n";
 
 		return (headers.str());
 }
@@ -93,12 +97,7 @@ void	Response::init_resource()
 	if (is_cgi() && method != "DELETE")
 		cgi_handler();
 	else if (location_block->get_return() != "" && method != "DELETE")
-	{
-		is_redirection = true;
-		set_status(location_block->get_return() == "301" ? HTTP_MOVED_PERMANENTLY : HTTP_FOUND);
-		resource = "<html><body><h1>" + code + " " + text + "</h1></body></html>";
-		content_type = "text/html";
-	}
+		handle_redirection();
 	else if (method == "DELETE")
 		delete_method();
 	else

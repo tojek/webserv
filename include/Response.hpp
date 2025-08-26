@@ -59,6 +59,7 @@ class Response
 		std::string			resource_full_path;
 		std::string			resource;
 		std::string 		content_type;
+		std::string			redir_location;
 		size_t				content_size;
 
 		bool				is_cgi();
@@ -71,7 +72,7 @@ class Response
 		std::string			cgi_content_type();
 
 		bool				is_redirection;
-		std::string			handle_redirection();
+		void				handle_redirection();
 		void				static_file_handler();
 		std::string			generate_directory_listing(const std::string& dir_path);
 		void				delete_method();

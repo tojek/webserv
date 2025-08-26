@@ -243,9 +243,17 @@ int	Response::is_method_allowed()
 	return (1);
 }
 
-std::string	Response::handle_redirection()
+void	Response::handle_redirection()
 {
+	std::string	ret_directive;
+	size_t		pos;
+
+	ret_directive = location_block->get_return();
+	std::cout << "ret directive: " << ret_directive << std::endl;
+	is_redirection = true;
 	set_status(location_block->get_return() == "301" ? HTTP_MOVED_PERMANENTLY : HTTP_FOUND);
+	pos = ret_directive.find_last_of(" ");
+	redir_location = ret_directive.substr(pos + 1);
 	resource = "<html><body><h1>" + code + " " + text + "</h1></body></html>";
 	content_type = "text/html";
 }

@@ -41,7 +41,6 @@ Request::Request(int client_fd)
 		if (n == -1)
 			break;
 		raw_request.append(buffer, n);
-		std::cout << raw_request << std::endl;
 		pos = raw_request.find("\r\n\r\n");
 		if (pos != std::string::npos)
 		{

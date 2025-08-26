@@ -112,8 +112,8 @@ void Location::read_return(int line_num, std::string& reminder)
 	return_value = reminder.substr(0, semicolon_pos);
 	trim_whitespace(return_value);
 
-	if (return_value != "on" && return_value != "off")
-		parser_error("Invalid 'directory_listing' value. Expected 'on' or 'off'.", line_num);
+	if (return_value.empty())
+		parser_error("Empty 'return' directive.", line_num);
 	
 	directive["return"] = return_value;
 }
