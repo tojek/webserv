@@ -15,7 +15,7 @@ void	Response::static_file_handler()
 		return ;
 	if (access(resource_full_path.c_str(), F_OK) == -1)
 	{
-		set_status_line("404", "Not Found");
+		set_status(HTTP_NOT_FOUND);
 		resource = "<html><body><h1>404 Not Found</h1></body></html>";
 		return;
 	}
@@ -35,33 +35,25 @@ struct stat {
 
 	if (S_ISDIR(path_stat.st_mode))
 	{
-		// Try to serve index file first
-		std::string index_path = resource_full_path + "/" + location_block->get_index();
-
-		//serve index
-		if (access(index_path.c_str(), F_OK) == 0)
-			resource_full_path = index_path;
-		else if (location_block->get_directory_listing() == "on")
+		if (location_block->get_directory_listing() == "on")
 		{
-			set_status_line("200", "OK");
+			set_status(HTTP_OK);
 			resource = generate_directory_listing(resource_full_path);
 			content_type = "text/html";
-			return;
 		}
 		else
 		{
-			set_status_line("403", "Forbidden");
+			set_status(HTTP_FORBIDDEN);
 			resource = "<html><body><h1>403 Forbidden</h1></body></html>";
 			content_type = "text/html";
-			return;
 		}
+		return;
 	}
 
 	// Regular file: check if readable and give
 	if (access(resource_full_path.c_str(), R_OK) == -1)
 	{
-		code = "403";
-		text = "Forbidden";
+		set_status(HTTP_FORBIDDEN);
 		resource = "<html><body><h1>403 Forbidden</h1></body></html>";
 		content_type = "text/html";
 	}
@@ -69,7 +61,7 @@ struct stat {
 		delete_method();
 	else
 	{
-		set_status_line("200", "OK");
+		set_status(HTTP_OK);
 		std::stringstream buffer;
 		file_content.open(resource_full_path.c_str());
 		buffer << file_content.rdbuf();
@@ -147,13 +139,13 @@ void	Response::delete_method()
 	if (std::remove(resource_full_path.c_str()) == -1)
 	{
 		resource = "<html><body><h1>403 Forbidden</h1></body></html>";
-		set_status_line("403", "Forbidden");
+		set_status(HTTP_FORBIDDEN);
 		return ;
 	}
 	else
 	{
 		resource = "";
-		set_status_line("204", "No Content");
+		set_status(HTTP_NO_CONTENT);
 		return ;
 	}
 }
@@ -164,6 +156,63 @@ void	Response::set_status_line(std::string code, std::string text)
 	this->text = text;
 }
 
+void	Response::set_status(HttpStatus status)
+{
+	switch(status) {
+		case HTTP_OK:
+			set_status_line("200", "OK");
+			break;
+		case HTTP_CREATED:
+			set_status_line("201", "Created");
+			break;
+		case HTTP_NO_CONTENT:
+			set_status_line("204", "No Content");
+			break;
+		case HTTP_MOVED_PERMANENTLY:
+			set_status_line("301", "Moved Permanently");
+			break;
+		case HTTP_FOUND:
+			set_status_line("302", "Found");
+			break;
+		case HTTP_BAD_REQUEST:
+			set_status_line("400", "Bad Request");
+			break;
+		case HTTP_UNAUTHORIZED:
+			set_status_line("401", "Unauthorized");
+			break;
+		case HTTP_FORBIDDEN:
+			set_status_line("403", "Forbidden");
+			break;
+		case HTTP_NOT_FOUND:
+			set_status_line("404", "Not Found");
+			break;
+		case HTTP_METHOD_NOT_ALLOWED:
+			set_status_line("405", "Method Not Allowed");
+			break;
+		case HTTP_PAYLOAD_TOO_LARGE:
+			set_status_line("413", "Payload Too Large");
+			break;
+		case HTTP_URI_TOO_LONG:
+			set_status_line("414", "URI Too Long");
+			break;
+		case HTTP_INTERNAL_SERVER_ERROR:
+			set_status_line("500", "Internal Server Error");
+			break;
+		case HTTP_NOT_IMPLEMENTED:
+			set_status_line("501", "Not Implemented");
+			break;
+		case HTTP_BAD_GATEWAY:
+			set_status_line("502", "Bad Gateway");
+			break;
+		case HTTP_SERVICE_UNAVAILABLE:
+			set_status_line("503", "Service Unavailable");
+			break;
+		default:
+			set_status_line("500", "Internal Server Error");
+			break;
+	}
+}
+
 int	Response::is_method_allowed()
 {
 	std::string methods = location_block->get_allowed_methods();
@@ -171,7 +220,7 @@ int	Response::is_method_allowed()
 	if (methods.find(method) == std::string::npos)
 	{
 		resource = "<html><body><h1>405 Method Not Allowed</h1></body></html>";
-		set_status_line("405", "Method Not Allowed");
+		set_status(HTTP_METHOD_NOT_ALLOWED);
 		return (0);
 	}
 	return (1);

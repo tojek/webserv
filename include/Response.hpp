@@ -12,6 +12,25 @@
 #include <dirent.h> // read dir listing
 #include <ctime>
 
+enum HttpStatus {
+	HTTP_OK = 200,
+	HTTP_CREATED = 201,
+	HTTP_NO_CONTENT = 204,
+	HTTP_MOVED_PERMANENTLY = 301,
+	HTTP_FOUND = 302,
+	HTTP_BAD_REQUEST = 400,
+	HTTP_UNAUTHORIZED = 401,
+	HTTP_FORBIDDEN = 403,
+	HTTP_NOT_FOUND = 404,
+	HTTP_METHOD_NOT_ALLOWED = 405,
+	HTTP_PAYLOAD_TOO_LARGE = 413,
+	HTTP_URI_TOO_LONG = 414,
+	HTTP_INTERNAL_SERVER_ERROR = 500,
+	HTTP_NOT_IMPLEMENTED = 501,
+	HTTP_BAD_GATEWAY = 502,
+	HTTP_SERVICE_UNAVAILABLE = 503
+};
+
 class Response
 {
 	public:
@@ -62,6 +81,7 @@ class Response
 		const Location		*select_location(const std::vector<Location> &locations);
 		void				init_resource();
 		void				set_status_line(std::string code, std::string text);
+		void				set_status(HttpStatus status);
 
 
 		std::string							get_content_type();

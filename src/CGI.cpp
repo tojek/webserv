@@ -6,7 +6,7 @@
 
 void	Response::cgi_handler()
 {
-	set_status_line("200", "OK");
+	set_status(HTTP_OK);
 	pid_t	pid;
 	std::stringstream buf;
 
@@ -74,9 +74,9 @@ std::string	Response::cgi_content_type()
 
 	std::istringstream header_stream(resource);
 	std::string line;
-	while (std::getline(header_stream, line)) 
+	while (std::getline(header_stream, line))
 	{
-   		if (line.find("Content-Type:") == 0) 
+   		if (line.find("Content-Type:") == 0)
 		{
        		cont_type = line.substr(strlen("Content-Type:"));
         	break;
