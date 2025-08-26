@@ -15,7 +15,7 @@ std::string	Response::make_response()
 	
 	std::strftime(date_str, sizeof(date_str), "%a %b %d %H:%M:%S %Y", std::localtime(&timestamp));
 	headers << "HTTP/1.1 " << code << " " << text << "\r\n"
-		<< "Server: SeriousServer\r\n" 
+		<< "Server: SeriousServer\r\n"
 		<< "Date: " << date_str << "\r\n"
 		<< "Content-Type: " << content_type << "\r\n"
 		<< "Content-Length: " << resource.size() << "\r\n"
@@ -24,12 +24,12 @@ std::string	Response::make_response()
 
 
 	std::cout << "HTTP/1.1 " << code << " " << text << "\r\n"
-		<< "Server: SeriousServer\r\n" 
+		<< "Server: SeriousServer\r\n"
 		<< "Date: " << date_str << "\r\n"
 		<< "Content-Type: " << content_type << "\r\n"
 		<< "Content-Length: " << resource.size() << "\r\n"
 		<< "Connection: keep-alive\r\n\r\n";
-		
+
 		return (headers.str());
 }
 
@@ -146,4 +146,60 @@ void	Response::set_up_contenttypes()
 	cont_types["djvu"] = "image/vnd.djvu";
 	cont_types["json"] = "application/json";
 	cont_types["zip"] = "application/zip";
+}
+
+std::string Response::get_error_page(int error_code)
+{
+	// Check if server has configured error page for this code
+	std::map<int, std::string>::const_iterator it = server_block->error_pages.find(error_code);
+
+	if (it != server_block->error_pages.end())
+	{
+		std::string error_page_path = it->second;
+		std::string full_path;
+
+		// same as regular file serving
+		char new_root[1000];
+		realpath(location_block->get_root().c_str(), new_root);
+		full_path = std::string(new_root) + error_page_path;
+
+		// Try to read the error page file
+		std::ifstream error_file(full_path.c_str());
+		if (error_file.is_open())
+		{
+			std::stringstream buffer;
+			buffer << error_file.rdbuf();
+			error_file.close();
+			std::string content = buffer.str();
+			if (!content.empty())
+				return content;
+		}
+	}
+
+	// Fallback to default
+	return get_default_error_page();
+}
+
+std::string Response::get_default_error_page()
+{
+	std::stringstream html;
+
+	html << "<!DOCTYPE html>\n";
+	html << "<html lang=\"en\">\n";
+	html << "<head>\n";
+	html << "    <meta charset=\"UTF-8\">\n";
+	html << "    <title>" << code << " " << text << "</title>\n";
+	html << "    <style>\n";
+	html << "        body { font-family: Arial, sans-serif; text-align: center; padding: 50px; }\n";
+	html << "        h1 { font-size: 48px; margin-bottom: 20px; color: #e74c3c; }\n";
+	html << "        p { font-size: 18px; color: #7f8c8d; }\n";
+	html << "    </style>\n";
+	html << "</head>\n";
+	html << "<body>\n";
+	html << "    <h1>" << code << " " << text << "</h1>\n";
+	html << "    <p>An error occurred while processing your request.</p>\n";
+	html << "</body>\n";
+	html << "</html>\n";
+
+	return html.str();
 }

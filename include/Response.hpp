@@ -84,7 +84,8 @@ class Response
 		void				init_resource();
 		void				set_status_line(std::string code, std::string text);
 		void				set_status(HttpStatus status);
-
+		std::string			get_error_page(int error_code);
+		std::string			get_default_error_page();
 
 		std::string							get_content_type();
 		void								set_up_contenttypes();
