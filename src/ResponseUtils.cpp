@@ -34,18 +34,25 @@ struct stat {
 
 	if (S_ISDIR(path_stat.st_mode))
 	{
-		if (location_block->get_directory_listing() == "on")
+		// Try to serve index file first
+		std::string index_path = resource_full_path + "/" + location_block->get_index();
+
+		//serve index
+		if (access(index_path.c_str(), F_OK) == 0)
+			resource_full_path = index_path;
+		else if (location_block->get_directory_listing() == "on")
 		{
 			set_status(HTTP_OK);
 			resource = generate_directory_listing(resource_full_path);
 			content_type = "text/html";
+			return;
 		}
 		else
 		{
 			set_status(HTTP_FORBIDDEN);
 			content_type = "text/html";
+			return;
 		}
-		return;
 	}
 
 	// Regular file: check if readable and give
