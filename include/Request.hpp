@@ -50,4 +50,5 @@ class Request
 		std::string	get_http_version();
 		std::string	get_content_size();
 		std::string	get_content_type();
+		std::string get_connection();
 };

@@ -194,3 +194,11 @@ std::string	Request::get_body()
 {
 	return (body);
 }
+
+std::string Request::get_connection()
+{
+	std::map<std::string, std::string>::const_iterator it = tokens.find("Connection");
+	if (it == tokens.end() || it->second.empty())
+		return "keep-alive";
+	return it->second;
+}

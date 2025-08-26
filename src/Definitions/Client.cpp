@@ -54,6 +54,10 @@ void Client::read_request()
 	if (request != NULL)
 		delete request;
 	request = new Request(client_fd);
+	if (request->get_connection() == "close")
+		connection_status = false;
+	else
+		connection_status = true;
 }
 
 void Client::send_response(Server &serv)

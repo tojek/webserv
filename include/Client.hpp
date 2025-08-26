@@ -26,9 +26,9 @@ class Client
 private:
 	int			client_fd;
 	int			blocking_flag;
-	Request		*request;
 	Response	*response;
 public:
+	Request			*request;
 	static int		accept_client(Server &serv);
 	static Client	*find_client(Server &serv, int event_fd);
 	void			read_request();
@@ -37,6 +37,7 @@ public:
 	int				get_blocking_flag();
 	Client(Server &serv);
 	~Client();
+	bool			connection_status;
 };
 
 #endif

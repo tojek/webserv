@@ -2,6 +2,7 @@
 #include "Server.hpp"
 #include "Webserv.hpp"
 #include "Signal.hpp"
+#include "Request.hpp"
 #include <iostream>
 #include <sys/epoll.h>
 #include <unistd.h>
@@ -251,15 +252,17 @@ void ServerManager::handle_client_request(int client_fd, Server* server)
     {
         client->read_request();
         client->send_response(*server);
-
-        // Remove client fd from master epoll after handling
-        epoll_ctl(master_epoll_fd, EPOLL_CTL_DEL, client_fd, NULL);
-        std::cout << "Handled request and closed connection on fd " << client_fd << std::endl;
+        if (client->connection_status == false)
+        {
+            delete client;
+            epoll_ctl(master_epoll_fd, EPOLL_CTL_DEL, client_fd, NULL);
+            std::cout << "Handled request and closed connection on fd " << client_fd << std::endl;
+        }
+        else
+            std::cout << "Keeping connection alive on fd " << client_fd << std::endl;
     }
     else
-    {
         std::cerr << "Warning: Could not find client for fd " << client_fd << std::endl;
-    }
 }
 
 void ServerManager::process_events(int num_events)
