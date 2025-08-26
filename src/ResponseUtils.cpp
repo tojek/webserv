@@ -249,7 +249,6 @@ void	Response::handle_redirection()
 	size_t		pos;
 
 	ret_directive = location_block->get_return();
-	std::cout << "ret directive: " << ret_directive << std::endl;
 	is_redirection = true;
 	set_status(location_block->get_return() == "301" ? HTTP_MOVED_PERMANENTLY : HTTP_FOUND);
 	pos = ret_directive.find_last_of(" ");
