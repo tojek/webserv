@@ -16,7 +16,6 @@ void	Response::static_file_handler()
 	if (access(resource_full_path.c_str(), F_OK) == -1)
 	{
 		set_status(HTTP_NOT_FOUND);
-		resource = "<html><body><h1>404 Not Found</h1></body></html>";
 		return;
 	}
 /*
@@ -44,7 +43,6 @@ struct stat {
 		else
 		{
 			set_status(HTTP_FORBIDDEN);
-			resource = "<html><body><h1>403 Forbidden</h1></body></html>";
 			content_type = "text/html";
 		}
 		return;
@@ -54,7 +52,6 @@ struct stat {
 	if (access(resource_full_path.c_str(), R_OK) == -1)
 	{
 		set_status(HTTP_FORBIDDEN);
-		resource = "<html><body><h1>403 Forbidden</h1></body></html>";
 		content_type = "text/html";
 	}
 	else if (request->get_method() == "DELETE")
@@ -117,7 +114,12 @@ std::string	Response::generate_directory_listing(const std::string& dir_path)
 			std::string name = entry->d_name;
 			if (name != "." && name != "..")
 			{
-				html << "<li><a href=\"" << name << "\">" << name << "</a></li>";
+				std::string url = request_uri;
+				if (!url.empty() && url[url.length() - 1] != '/')
+					url += "/";
+				url += name;
+
+				html << "<li><a href=\"" << url << "\">" << name << "</a></li>";
 			}
 		}
 		closedir(dir);
@@ -138,7 +140,6 @@ void	Response::delete_method()
 		return ;
 	if (std::remove(resource_full_path.c_str()) == -1)
 	{
-		resource = "<html><body><h1>403 Forbidden</h1></body></html>";
 		set_status(HTTP_FORBIDDEN);
 		return ;
 	}
@@ -176,39 +177,51 @@ void	Response::set_status(HttpStatus status)
 			break;
 		case HTTP_BAD_REQUEST:
 			set_status_line("400", "Bad Request");
+			resource = get_error_page(400);
 			break;
 		case HTTP_UNAUTHORIZED:
 			set_status_line("401", "Unauthorized");
+			resource = get_error_page(401);
 			break;
 		case HTTP_FORBIDDEN:
 			set_status_line("403", "Forbidden");
+			resource = get_error_page(403);
 			break;
 		case HTTP_NOT_FOUND:
 			set_status_line("404", "Not Found");
+			resource = get_error_page(404);
 			break;
 		case HTTP_METHOD_NOT_ALLOWED:
 			set_status_line("405", "Method Not Allowed");
+			resource = get_error_page(405);
 			break;
 		case HTTP_PAYLOAD_TOO_LARGE:
 			set_status_line("413", "Payload Too Large");
+			resource = get_error_page(413);
 			break;
 		case HTTP_URI_TOO_LONG:
 			set_status_line("414", "URI Too Long");
+			resource = get_error_page(414);
 			break;
 		case HTTP_INTERNAL_SERVER_ERROR:
 			set_status_line("500", "Internal Server Error");
+			resource = get_error_page(500);
 			break;
 		case HTTP_NOT_IMPLEMENTED:
 			set_status_line("501", "Not Implemented");
+			resource = get_error_page(501);
 			break;
 		case HTTP_BAD_GATEWAY:
 			set_status_line("502", "Bad Gateway");
+			resource = get_error_page(502);
 			break;
 		case HTTP_SERVICE_UNAVAILABLE:
 			set_status_line("503", "Service Unavailable");
+			resource = get_error_page(503);
 			break;
 		default:
 			set_status_line("500", "Internal Server Error");
+			resource = get_error_page(500);
 			break;
 	}
 }
@@ -219,7 +232,6 @@ int	Response::is_method_allowed()
 
 	if (methods.find(method) == std::string::npos)
 	{
-		resource = "<html><body><h1>405 Method Not Allowed</h1></body></html>";
 		set_status(HTTP_METHOD_NOT_ALLOWED);
 		return (0);
 	}
