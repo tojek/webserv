@@ -40,14 +40,11 @@ Request::Request(int client_fd)
 		n = read(client_fd, buffer, 3);
 		if (n == -1)
 			break;
-			
-		// std::cout << PINK "Read " << n << " bytes from client_fd: " RESET << client_fd << std::endl;
 		raw_request.append(buffer, n);
 		std::cout << raw_request << std::endl;
 		pos = raw_request.find("\r\n\r\n");
 		if (pos != std::string::npos)
 		{
-			std::cout << "found crlf\n";
 			parse_request(raw_request.substr(0, pos + 4));
 			body = raw_request.substr(pos + 4);
 			it = tokens.find("Content-Length");
@@ -70,9 +67,7 @@ Request::Request(int client_fd)
 				break; // Break after processing chunked request
 			}
 			else
-			{
 				break; // Break if headers are parsed and no body is expected
-			}
 		}
 	}
 

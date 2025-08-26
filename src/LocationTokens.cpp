@@ -100,3 +100,21 @@ void Location::read_directory_listing(int line_num, std::string& reminder)
 	
 	directive["directory_listing"] = directory_listing_value;
 }
+
+void Location::read_return(int line_num, std::string& reminder)
+{
+	std::string	return_value;
+	size_t		semicolon_pos = reminder.find(';');
+
+	if (semicolon_pos == std::string::npos)
+		parser_error("Missing ';' after 'directory_listing' directive.", line_num);
+
+	return_value = reminder.substr(0, semicolon_pos);
+	trim_whitespace(return_value);
+
+	if (return_value != "on" && return_value != "off")
+		parser_error("Invalid 'directory_listing' value. Expected 'on' or 'off'.", line_num);
+	
+	directive["return"] = return_value;
+}
+

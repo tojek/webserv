@@ -30,6 +30,7 @@ private:
 	void    read_cgi_extension(int line_num, std::string& reminder);
 	void    read_directory_listing(int line_num, std::string& reminder);
 	void    read_allowed_methods(int line_num, std::string& reminder);
+	void    read_return(int line_num, std::string& reminder);	
 	void    validate_methods(int line_num, std::string& reminder);
 
 	void	fill_tokens();
@@ -48,6 +49,7 @@ public:
 	const std::string	get_cgi_extension() const;
 	const std::string	get_directory_listing() const;
 	const std::string	get_allowed_methods() const;
+	const std::string	get_return() const;
 };
 
 #endif

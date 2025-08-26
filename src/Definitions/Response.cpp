@@ -12,7 +12,7 @@ std::string	Response::make_response()
 
 	// get content type of output
 	content_type = get_content_type();
-
+	
 	std::strftime(date_str, sizeof(date_str), "%a %b %d %H:%M:%S %Y", std::localtime(&timestamp));
 	headers << "HTTP/1.1 " << code << " " << text << "\r\n"
 		<< "Server: SeriousServer\r\n" 
@@ -89,8 +89,18 @@ void	Response::get_full_path()
 
 void	Response::init_resource()
 {
+	is_redirection = false;
 	if (is_cgi() && method != "DELETE")
 		cgi_handler();
+	else if (location_block->get_return() != "" && method != "DELETE")
+	{
+		is_redirection = true;
+		set_status(location_block->get_return() == "301" ? HTTP_MOVED_PERMANENTLY : HTTP_FOUND);
+		resource = "<html><body><h1>" + code + " " + text + "</h1></body></html>";
+		content_type = "text/html";
+	}
+	else if (method == "DELETE")
+		delete_method();
 	else
 		static_file_handler();
 }

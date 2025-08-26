@@ -70,6 +70,8 @@ class Response
 		int					pipe_out[2];
 		std::string			cgi_content_type();
 
+		bool				is_redirection;
+		std::string			handle_redirection();
 		void				static_file_handler();
 		std::string			generate_directory_listing(const std::string& dir_path);
 		void				delete_method();

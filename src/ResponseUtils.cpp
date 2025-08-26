@@ -57,8 +57,6 @@ struct stat {
 		resource = "<html><body><h1>403 Forbidden</h1></body></html>";
 		content_type = "text/html";
 	}
-	else if (request->get_method() == "DELETE")
-		delete_method();
 	else
 	{
 		set_status(HTTP_OK);
@@ -224,4 +222,11 @@ int	Response::is_method_allowed()
 		return (0);
 	}
 	return (1);
+}
+
+std::string	Response::handle_redirection()
+{
+	set_status(location_block->get_return() == "301" ? HTTP_MOVED_PERMANENTLY : HTTP_FOUND);
+	resource = "<html><body><h1>" + code + " " + text + "</h1></body></html>";
+	content_type = "text/html";
 }
