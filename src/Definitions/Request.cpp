@@ -30,7 +30,7 @@ Request::Request(int client_fd)
 	std::string raw_request;
 	int n = 1;
 	size_t pos = 0;
-	size_t body_size = 0;
+	body_size = 0;
 	std::map<std::string, std::string>::const_iterator it;
 
 	std::memset(buffer, 0, 2048);
@@ -195,4 +195,9 @@ std::string Request::get_connection()
 	if (it == tokens.end() || it->second.empty())
 		return "keep-alive";
 	return it->second;
+}
+
+size_t	Request::get_body_size()
+{
+	return (body_size);
 }

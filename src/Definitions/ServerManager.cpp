@@ -232,7 +232,7 @@ void ServerManager::handle_new_connection(int server_fd, Server* server)
         struct epoll_event ev;
         ev.events = EPOLLIN;
         ev.data.fd = client_fd;
-
+        std::cout << LIGHT_BLUE << "New connection on server fd " << server_fd << " accepted, client fd: " << client_fd << RESET << std::endl;
         if (epoll_ctl(master_epoll_fd, EPOLL_CTL_ADD, client_fd, &ev) == -1)
         {
             std::cerr << "Failed to add client fd " << client_fd << " to master epoll" << std::endl;

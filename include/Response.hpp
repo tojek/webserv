@@ -46,6 +46,7 @@ class Response
 
 	private:
 		std::string			body;
+		size_t				body_size;
 
 		std::string			method;
 		std::string 		host;

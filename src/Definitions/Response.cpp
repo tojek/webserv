@@ -41,6 +41,7 @@ void Response::init_response(Request *request, Server *server)
 {
 	this->request = request;
 	body = request->get_body();
+	body_size = request->get_body_size();
 	method = request->get_method();
 	request_uri = request->get_request_uri();
 	http_version = request->get_http_version();
@@ -94,8 +95,15 @@ void	Response::get_full_path()
 void	Response::init_resource()
 {
 	is_redirection = false;
+
 	if (is_cgi() && method != "DELETE")
 		cgi_handler();
+	else if (body_size > server_block->client_max_body_size)
+	{
+		set_status(HTTP_PAYLOAD_TOO_LARGE);
+		resource = "<html><body><h1>" + code + " " + text + "</h1></body></html>";
+		content_type = "text/html";
+	}
 	else if (location_block->get_return() != "" && method != "DELETE")
 		handle_redirection();
 	else if (method == "DELETE")

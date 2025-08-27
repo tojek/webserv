@@ -29,6 +29,7 @@ class Request
 		std::string							body;
 		int	 								client_fd;
 		int									copy_client_fd;
+		size_t								body_size;
 
 		void	process_line(std::string& line, int line_num, bool body_flag);
 		void	parse_requestline(std::string& line);
@@ -44,6 +45,7 @@ class Request
 		void		chunked_request_parser(std::string raw_request, size_t pos);
 
 		std::string	get_body();
+		size_t		get_body_size();
 		std::string	get_method();
 		std::string	get_request_uri();
 		std::string	get_host();
