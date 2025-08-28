@@ -103,7 +103,7 @@ Client::Client(Server &serv)
 	info = serv.get_info();
 	info.events = EPOLLIN | EPOLLET;
 	info.data.fd = client_fd;
-	epoll_ctl(serv.get_epoll_fd(), EPOLL_CTL_ADD, client_fd, &info);
+	// epoll_ctl(serv.get_epoll_fd(), EPOLL_CTL_ADD, client_fd, &info);
 }
 
 Client::~Client()

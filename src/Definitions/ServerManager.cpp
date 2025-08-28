@@ -7,6 +7,7 @@
 #include <sys/epoll.h>
 #include <unistd.h>
 #include <errno.h>
+#include <cstring>
 
 ServerManager::ServerManager(const ConfigParser& parser) : config_parser(parser), master_epoll_fd(-1)
 {
@@ -228,7 +229,6 @@ void ServerManager::handle_new_connection(int server_fd, Server* server)
     int client_fd = Client::accept_client(*server);
     if (client_fd > 0)
     {
-        // Add the new client fd to master epoll
         struct epoll_event ev;
         ev.events = EPOLLIN;
         ev.data.fd = client_fd;
@@ -245,6 +245,7 @@ void ServerManager::handle_new_connection(int server_fd, Server* server)
     }
 }
 
+
 void ServerManager::handle_client_request(int client_fd, Server* server)
 {
     Client* client = Client::find_client(*server, client_fd);
@@ -254,7 +255,7 @@ void ServerManager::handle_client_request(int client_fd, Server* server)
         client->send_response(*server);
         if (client->connection_status == false)
         {
-            delete client;
+            // delete client;
             epoll_ctl(master_epoll_fd, EPOLL_CTL_DEL, client_fd, NULL);
             std::cout << "Handled request and closed connection on fd " << client_fd << std::endl;
         }
