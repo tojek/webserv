@@ -257,7 +257,7 @@ void ServerManager::handle_client_request(int client_fd, Server* server)
             std::cout << "ready to response\n";
             client->send_response(*server);
             
-            if (client->connection_status == false)
+            if (client->connection_status == false || client->request->connection_closed == true)
             {
                 // delete client;
                epoll_ctl(master_epoll_fd, EPOLL_CTL_DEL, client_fd, NULL);

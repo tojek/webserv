@@ -30,12 +30,14 @@ void	Request::request_init(int client_fd)
     size_t pos = 0;
     std::map<std::string, std::string>::const_iterator it;
 	request_complete = false;
+	connection_closed = false;
 
     n = recv(client_fd, buffer, sizeof(buffer), 0);
 
 	std::cout << LIGHT_BLUE << "bytes read: " << n << "\n" << RESET;
 	if (n == 0)
 	{
+		connection_closed = true;
 		std::cout << "0 bytes read, connection closed by client.\n";
 		request_complete = true;
 		return;
