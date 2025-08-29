@@ -98,12 +98,12 @@ void	Response::init_resource()
 
 	if (is_cgi() && method != "DELETE")
 		cgi_handler();
-	else if (body_size > server_block->client_max_body_size)
-	{
-		set_status(HTTP_PAYLOAD_TOO_LARGE);
-		resource = "<html><body><h1>" + code + " " + text + "</h1></body></html>";
-		content_type = "text/html";
-	}
+	// else if (body_size > server_block->client_max_body_size)
+	// {
+	// 	set_status(HTTP_PAYLOAD_TOO_LARGE);
+	// 	resource = "<html><body><h1>" + code + " " + text + "</h1></body></html>";
+	// 	content_type = "text/html";
+	// }
 	else if (location_block->get_return() != "" && method != "DELETE")
 		handle_redirection();
 	else if (method == "DELETE")

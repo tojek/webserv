@@ -52,8 +52,15 @@ Client *Client::find_client(Server &serv, int event_fd)
 void Client::read_request()
 {
 	if (request != NULL)
-		delete request;
-	request = new Request(client_fd);
+	{
+		std::cout << LIGHT_BLUE << "old request form\n" RESET;
+		request->request_init(client_fd);
+	}
+	else
+	{
+		std::cout << LIGHT_BLUE << "new request form\n" RESET;
+		request = new Request(client_fd);
+	}
 	if (request->get_connection() == "close")
 		connection_status = false;
 	else
@@ -112,4 +119,15 @@ Client::~Client()
 		delete request;
 	if (response != NULL)
 		delete response;
+}
+
+void Client::delete_request()
+{
+	std::cout << "deleting request\n";
+	if (request != NULL)
+		delete request;
+	request = NULL;
+	if (response != NULL)
+		delete response;
+	response = NULL;
 }

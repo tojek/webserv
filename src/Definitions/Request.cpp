@@ -20,56 +20,81 @@ void Request::parse_request(std::string headers)
 	}	
 }
 
-Request::Request()
+void	Request::request_init(int client_fd)
 {
 
+	ssize_t n = 1;
+	std::memset(buffer, 0, sizeof(buffer));
+
+	this->client_fd = client_fd;
+    size_t pos = 0;
+    std::map<std::string, std::string>::const_iterator it;
+	request_complete = false;
+
+    n = recv(client_fd, buffer, sizeof(buffer), 0);
+
+	std::cout << LIGHT_BLUE << "bytes read: " << n << "\n" << RESET;
+	if (n == 0)
+	{
+		std::cout << "0 bytes read, connection closed by client.\n";
+		request_complete = true;
+		return;
+	}
+	if (n < 0)
+	{
+		std::cout << "Error reading from client socket.\n";
+		return;
+	}
+	// raw_request += buffer;
+	if (n > 0)
+		raw_request.append(buffer, n);
+	std::cout << "start: "<<raw_request << "end"<< std::endl;
+	pos = raw_request.find("\r\n\r\n");
+	std::cout << "after finding pos = " << pos << std::endl;
+	if (pos != std::string::npos)
+	{
+		parse_request(raw_request.substr(0, pos + 4));
+		headers_parsed = true;
+		std::cout << LIGHT_BLUE << "headers parsed\n" << RESET;
+	}
+	if (headers_parsed == true)
+	{
+   		body = raw_request.substr(pos + 4);
+		it = tokens.find("Content-Length");
+    	if (it != tokens.end())
+    	{
+        	std::istringstream(tokens["Content-Length"]) >> body_size;
+
+        	while (body.size() < body_size)
+        	{
+         		n = recv(client_fd, buffer, sizeof(buffer), 0);
+				if (n == 0)
+					break;
+           		body.append(buffer, n);
+        	}
+    	}
+    	else if (((it = tokens.find("Transfer-Encoding")) != tokens.end()))
+    	{
+    	    if (tokens["Transfer-Encoding"] == "chunked")
+            chunked_request_parser(raw_request, pos);
+    	}
+	}
+	if (headers_parsed)
+	{
+		// Debug::display_trace(tokens);
+		request_complete = true;
+	}
+	else
+		std::cout << "not finished\n";
 }
+
+Request::Request() {}
 
 Request::Request(int client_fd)
 {
-	std::string raw_request;
-	int n = 1;
-	size_t pos = 0;
-	body_size = 0;
-	std::map<std::string, std::string>::const_iterator it;
-
-	std::memset(buffer, 0, 2048);
-	this->client_fd = client_fd;	
-	while (n > 0)
-	{
-		n = read(client_fd, buffer, 3);
-		if (n == -1)
-			break;
-		raw_request.append(buffer, n);
-		pos = raw_request.find("\r\n\r\n");
-		if (pos != std::string::npos)
-		{
-			parse_request(raw_request.substr(0, pos + 4));
-			body = raw_request.substr(pos + 4);
-			it = tokens.find("Content-Length");
-			if (it != tokens.end())
-			{
-				std::istringstream (tokens["Content-Length"]) >> body_size;
-				if (body.size() == body_size)
-					break ;
-				else
-				{
-					raw_request.clear();  // Clear raw_request to read more data
-					std::memset(buffer, 0, sizeof(buffer));  // Reset buffer for next read
-					continue;
-				}
-			}
-			else if (((it = tokens.find("Transfer-Encoding")) != tokens.end()))
-			{
-				if (tokens["Transfer-Encoding"] == "chunked")
-					chunked_request_parser(raw_request, pos);
-				break; // Break after processing chunked request
-			}
-			else
-				break; // Break if headers are parsed and no body is expected
-		}
-	}
-
+	headers_parsed = false;
+	request_complete = false;
+	request_init(client_fd);
 }
 
 Request::~Request() 
@@ -96,7 +121,7 @@ void Request::parse_requestline(std::string& line)
 	tokens.insert(std::pair<std::string, std::string>("request_uri", request_line[1]));
 	tokens.insert(std::pair<std::string, std::string>("HTTP_version", request_line[2]));
 	
-	Debug::display_trace(tokens);
+	// Debug::display_trace(tokens);
 }
 
 void Request::parse_header(std::string& line)
@@ -193,11 +218,16 @@ std::string Request::get_connection()
 {
 	std::map<std::string, std::string>::const_iterator it = tokens.find("Connection");
 	if (it == tokens.end() || it->second.empty())
-		return "close";
+		return "keep-alive";
 	return it->second;
 }
 
 size_t	Request::get_body_size()
 {
 	return (body_size);
+}
+
+bool	Request::is_request_complete()
+{
+	return (request_complete);
 }

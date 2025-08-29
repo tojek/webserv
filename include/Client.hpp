@@ -35,6 +35,8 @@ public:
 	void			send_response(Server &serv);
 	int				get_client_fd();
 	int				get_blocking_flag();
+	void			delete_request();
+
 	Client(Server &serv);
 	~Client();
 	bool			connection_status;

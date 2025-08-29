@@ -230,7 +230,7 @@ void ServerManager::handle_new_connection(int server_fd, Server* server)
     if (client_fd > 0)
     {
         struct epoll_event ev;
-        ev.events = EPOLLIN;
+        ev.events = EPOLLIN | EPOLLET;
         ev.data.fd = client_fd;
         std::cout << LIGHT_BLUE << "New connection on server fd " << server_fd << " accepted, client fd: " << client_fd << RESET << std::endl;
         if (epoll_ctl(master_epoll_fd, EPOLL_CTL_ADD, client_fd, &ev) == -1)
@@ -252,15 +252,22 @@ void ServerManager::handle_client_request(int client_fd, Server* server)
     if (client)
     {
         client->read_request();
-        client->send_response(*server);
-        if (client->connection_status == false)
+        if (client->request->is_request_complete())
         {
-            // delete client;
-            epoll_ctl(master_epoll_fd, EPOLL_CTL_DEL, client_fd, NULL);
-            std::cout << "Handled request and closed connection on fd " << client_fd << std::endl;
+            std::cout << "ready to response\n";
+            client->send_response(*server);
+            
+            if (client->connection_status == false)
+            {
+                // delete client;
+               epoll_ctl(master_epoll_fd, EPOLL_CTL_DEL, client_fd, NULL);
+               std::cout << "Handled request and closed connection on fd " << client_fd << std::endl;
+            }
+            else
+               std::cout << "Keeping connection alive on fd " << client_fd << std::endl;
+            client->delete_request();
+
         }
-        else
-            std::cout << "Keeping connection alive on fd " << client_fd << std::endl;
     }
     else
         std::cerr << "Warning: Could not find client for fd " << client_fd << std::endl;

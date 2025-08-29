@@ -24,12 +24,17 @@
 class Request
 {
 	private:
+	    std::string							raw_request;
 		char								buffer[2048];
 		std::map<std::string, std::string>	tokens;
 		std::string							body;
 		int	 								client_fd;
 		int									copy_client_fd;
 		size_t								body_size;
+
+		bool								headers_parsed;
+		bool								connection_closed;
+		bool								request_complete;
 
 		void	process_line(std::string& line, int line_num, bool body_flag);
 		void	parse_requestline(std::string& line);
@@ -43,6 +48,7 @@ class Request
 
 		void		parse_request(std::string headers);
 		void		chunked_request_parser(std::string raw_request, size_t pos);
+		void   		request_init(int client_fd);
 
 		std::string	get_body();
 		size_t		get_body_size();
@@ -53,4 +59,6 @@ class Request
 		std::string	get_content_size();
 		std::string	get_content_type();
 		std::string get_connection();
+
+		bool		is_request_complete();
 };
