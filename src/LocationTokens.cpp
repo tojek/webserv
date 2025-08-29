@@ -41,7 +41,7 @@ void Location::validate_methods(int line_num, std::string& reminder)
 
 	while (methods_stream >> method)
 	{
-		if (method != "GET" && method != "POST" && method != "DELETE")
+		if (method != "GET" && method != "POST" && method != "DELETE" && method != "HEAD")
 			parser_error("Invalid method '" + method + "' in 'allowed_methods' directive.", line_num);
 		has_valid_method = true;
 	}
@@ -97,7 +97,7 @@ void Location::read_directory_listing(int line_num, std::string& reminder)
 
 	if (directory_listing_value != "on" && directory_listing_value != "off")
 		parser_error("Invalid 'directory_listing' value. Expected 'on' or 'off'.", line_num);
-	
+
 	directive["directory_listing"] = directory_listing_value;
 }
 
@@ -114,7 +114,7 @@ void Location::read_return(int line_num, std::string& reminder)
 
 	if (return_value.empty())
 		parser_error("Empty 'return' directive.", line_num);
-	
+
 	directive["return"] = return_value;
 }
 

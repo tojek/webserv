@@ -12,7 +12,7 @@ std::string	Response::make_response()
 
 	// get content type of output
 	content_type = get_content_type();
-	
+
 	std::strftime(date_str, sizeof(date_str), "%a %b %d %H:%M:%S %Y", std::localtime(&timestamp));
 	headers << "HTTP/1.1 " << code << " " << text << "\r\n"
 		<< "Server: SeriousServer\r\n"
@@ -22,17 +22,20 @@ std::string	Response::make_response()
 		if (is_redirection == true)
 			headers << "Location: " << redir_location << "\r\n";
 		headers << "Connection: keep-alive\r\n\r\n";
-		headers << resource;
+		// headers << resource;
+
+	    if (method != "HEAD")
+            headers << resource;
 
 
-	std::cout << "HTTP/1.1 " << code << " " << text << "\r\n"
-		<< "Server: SeriousServer\r\n"
-		<< "Date: " << date_str << "\r\n"
-		<< "Content-Type: " << content_type << "\r\n"
-		<< "Content-Length: " << resource.size() << "\r\n";
-		if (is_redirection == true)
-			std::cout << "Location: " << redir_location << "\r\n";
-		std::cout << "Connection: keep-alive\r\n\r\n";
+	// std::cout << "HTTP/1.1 " << code << " " << text << "\r\n"
+	// 	<< "Server: SeriousServer\r\n"
+	// 	<< "Date: " << date_str << "\r\n"
+	// 	<< "Content-Type: " << content_type << "\r\n"
+	// 	<< "Content-Length: " << resource.size() << "\r\n";
+	// 	if (is_redirection == true)
+	// 		std::cout << "Location: " << redir_location << "\r\n";
+	// 	std::cout << "Connection: keep-alive\r\n\r\n";
 
 		return (headers.str());
 }

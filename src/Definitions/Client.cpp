@@ -89,7 +89,7 @@ int	Client::get_blocking_flag()
 
 Client::Client(Server &serv)
 {
-	epoll_event	info;
+	// epoll_event	info;
 
 	request = NULL;
 	response = NULL;
@@ -107,9 +107,9 @@ Client::Client(Server &serv)
 		return ;
 	}
 	blocking_flag = 0;
-	info = serv.get_info();
-	info.events = EPOLLIN | EPOLLET;
-	info.data.fd = client_fd;
+	// info = serv.get_info();
+	// info.events = EPOLLIN | EPOLLET;
+	// info.data.fd = client_fd;
 	// epoll_ctl(serv.get_epoll_fd(), EPOLL_CTL_ADD, client_fd, &info);
 }
 
