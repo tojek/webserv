@@ -33,6 +33,8 @@ class Request
 		size_t								body_size;
 
 		bool								headers_parsed;
+		bool								body_parsed;
+		bool								zero_byte_found;
 		bool								request_complete;
 
 		void	process_line(std::string& line, int line_num, bool body_flag);
@@ -46,7 +48,7 @@ class Request
 		~Request();
 
 		void		parse_request(std::string headers);
-		void		chunked_request_parser(std::string raw_request, size_t pos);
+		bool		chunked_request_parser(std::string raw_request, size_t pos);
 		void   		request_init(int client_fd);
 		bool		connection_closed;
 

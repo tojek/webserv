@@ -18,6 +18,7 @@ void Request::parse_request(std::string headers)
 		}
 		process_line(line, line_num, body_flag);
 	}	
+	headers_parsed = true;
 }
 
 void	Request::request_init(int client_fd)
@@ -31,14 +32,15 @@ void	Request::request_init(int client_fd)
     std::map<std::string, std::string>::const_iterator it;
 	request_complete = false;
 	connection_closed = false;
+	body_parsed = false;
 
     n = recv(client_fd, buffer, sizeof(buffer), 0);
 
-	std::cout << LIGHT_BLUE << "bytes read: " << n << "\n" << RESET;
+	// std::cout << LIGHT_BLUE << "bytes read: " << n << "\n" << RESET;
 	if (n == 0)
 	{
 		connection_closed = true;
-		std::cout << "0 bytes read, connection closed by client.\n";
+		std::cout << "connection closed by client.\n";
 		request_complete = true;
 		return;
 	}
@@ -47,24 +49,19 @@ void	Request::request_init(int client_fd)
 		std::cout << "Error reading from client socket.\n";
 		return;
 	}
-	// raw_request += buffer;
 	if (n > 0)
 		raw_request.append(buffer, n);
-	std::cout << "start: "<<raw_request << "end"<< std::endl;
+	// std::cout << "start: "<<raw_request << "end"<< std::endl;
 	pos = raw_request.find("\r\n\r\n");
-	std::cout << "after finding pos = " << pos << std::endl;
-	if (pos != std::string::npos)
-	{
+	if (pos != std::string::npos && !headers_parsed)
 		parse_request(raw_request.substr(0, pos + 4));
-		headers_parsed = true;
-		std::cout << LIGHT_BLUE << "headers parsed\n" << RESET;
-	}
 	if (headers_parsed == true)
 	{
    		body = raw_request.substr(pos + 4);
 		it = tokens.find("Content-Length");
     	if (it != tokens.end())
     	{
+			// std::cout << "Content-Length token found!\n";
         	std::istringstream(tokens["Content-Length"]) >> body_size;
 
         	while (body.size() < body_size)
@@ -74,20 +71,29 @@ void	Request::request_init(int client_fd)
 					break;
            		body.append(buffer, n);
         	}
+			body_parsed = true;
     	}
     	else if (((it = tokens.find("Transfer-Encoding")) != tokens.end()))
     	{
-    	    if (tokens["Transfer-Encoding"] == "chunked")
-            chunked_request_parser(raw_request, pos);
+			zero_byte_found = false;
+			// std::cout << "Transfer-Encoding token found!\n";
+    		if (tokens["Transfer-Encoding"] == "chunked")
+            {
+				if (chunked_request_parser(raw_request, pos))
+					body_parsed = true;
+			}
     	}
+		else
+			body_parsed = true;
 	}
-	if (headers_parsed)
+	if (headers_parsed && body_parsed)
 	{
+		std::cout << LIGHT_BLUE "ready to respond!!\n" RESET;
 		// Debug::display_trace(tokens);
 		request_complete = true;
 	}
-	else
-		std::cout << "not finished\n";
+	// else
+		// std::cout << "not finished\n";
 }
 
 Request::Request() {}
@@ -123,7 +129,7 @@ void Request::parse_requestline(std::string& line)
 	tokens.insert(std::pair<std::string, std::string>("request_uri", request_line[1]));
 	tokens.insert(std::pair<std::string, std::string>("HTTP_version", request_line[2]));
 	
-	// Debug::display_trace(tokens);
+	Debug::display_trace(tokens);
 }
 
 void Request::parse_header(std::string& line)
@@ -155,30 +161,58 @@ void Request::parse_body(std::string& line)
 	}
 }
 
-void Request::chunked_request_parser(std::string raw_request, size_t pos)
+bool Request::chunked_request_parser(const std::string raw_request, size_t pos)
 {
-	size_t chunk_start = pos + 4;
-	while (true)
-	{
-		// Find the next CRLF to get the chunk size line
-		size_t crlf_pos = raw_request.find("\r\n", chunk_start);
-		if (crlf_pos == std::string::npos)
-			break; // Incomplete chunk size line, need more data
-		std::string chunk_size_str = raw_request.substr(chunk_start, crlf_pos - chunk_start);
-		if (chunk_size_str.empty())
-			break; // End of chunks
-		std::istringstream iss(chunk_size_str);
-		size_t chunk_size = 0;
-		iss >> std::hex >> chunk_size;
-		if (chunk_size == 0)
-			break; // Last chunk
-		// The chunk data starts after the CRLF
-		size_t chunk_data_start = crlf_pos + 2;
-		if (raw_request.size() < chunk_data_start + chunk_size + 2)
-			break; // Incomplete chunk data, need more data
-		body.append(raw_request.substr(chunk_data_start, chunk_size));
-		chunk_start = chunk_data_start + chunk_size + 2; // Move past chunk data and trailing CRLF
-		}
+    size_t chunk_start = pos + 4; // skip past header terminator
+    while (true)
+    {
+        // Need a CRLF to end the chunk size line
+        size_t crlf_pos = raw_request.find("\r\n", chunk_start);
+        if (crlf_pos == std::string::npos)
+            return false; // incomplete, wait for more data
+
+        // Extract the size line (may contain ";ext")
+        std::string chunk_size_str = raw_request.substr(chunk_start, crlf_pos - chunk_start);
+        if (chunk_size_str.empty())
+            return false; // invalid (empty size line)
+
+        // Strip optional ";extension"
+        size_t semi = chunk_size_str.find(';');
+        if (semi != std::string::npos)
+            chunk_size_str = chunk_size_str.substr(0, semi);
+
+        // Parse hex size
+        size_t chunk_size = 0;
+        std::istringstream iss(chunk_size_str);
+        iss >> std::hex >> chunk_size;
+        if (iss.fail())
+            return false; // invalid hex
+        size_t chunk_data_start = crlf_pos;
+		// std::cout << LIGHT_PINK "body = " << body << "size: " << body.size() << RESET << std::endl;
+        if (chunk_size == 0)
+        {
+			// std::cout << LIGHT_BLUE "found the zero byte!!\n" RESET;
+            // Last-chunk: must have \r\n after trailers (or immediately)
+            size_t trailer_end = raw_request.find("\r\n\r\n", chunk_data_start);
+            if (trailer_end == std::string::npos)
+                return false; // trailers not complete yet
+            // You could parse trailers here if you want:
+            // std::string trailers = raw_request.substr(chunk_data_start, trailer_end - chunk_data_start);
+			std::cout << LIGHT_BLUE "chunked body completed!!\n" RESET;
+            return true; // body complete
+        }
+
+        // Check if we have full chunk data + trailing CRLF
+        if (raw_request.size() < chunk_data_start + chunk_size + 2)
+            return false; // incomplete, need more data
+
+        // Append chunk to body
+        body.append(raw_request.substr(chunk_data_start, chunk_size));
+
+        // Advance past chunk data + CRLF
+        chunk_start = chunk_data_start + chunk_size + 2;
+    }
+    return false;
 }
 
 std::string Request::get_method()

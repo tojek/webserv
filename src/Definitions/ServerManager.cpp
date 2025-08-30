@@ -238,10 +238,10 @@ void ServerManager::handle_new_connection(int server_fd, Server* server)
             std::cerr << "Failed to add client fd " << client_fd << " to master epoll" << std::endl;
             close(client_fd);
         }
-        else
-        {
-            std::cout << "New client connection accepted on fd " << client_fd << std::endl;
-        }
+        // else
+        // {
+        //     std::cout << "New client connection accepted on fd " << client_fd << std::endl;
+        // }
     }
 }
 
@@ -254,9 +254,8 @@ void ServerManager::handle_client_request(int client_fd, Server* server)
         client->read_request();
         if (client->request->is_request_complete())
         {
-            std::cout << "ready to response\n";
-            client->send_response(*server);
-            
+            if (!client->request->connection_closed)
+                client->send_response(*server);
             if (client->connection_status == false || client->request->connection_closed == true)
             {
                 // delete client;

@@ -22,10 +22,10 @@ std::string	Response::make_response()
 		if (is_redirection == true)
 			headers << "Location: " << redir_location << "\r\n";
 		headers << "Connection: keep-alive\r\n\r\n";
-		// headers << resource;
+		headers << resource;
 
-	    if (method != "HEAD")
-            headers << resource;
+	    // if (method != "HEAD")
+        //     headers << resource;
 
 
 	// std::cout << "HTTP/1.1 " << code << " " << text << "\r\n"

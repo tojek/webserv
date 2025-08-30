@@ -53,12 +53,12 @@ void Client::read_request()
 {
 	if (request != NULL)
 	{
-		std::cout << LIGHT_BLUE << "old request form\n" RESET;
+		// std::cout << LIGHT_BLUE << "old request form\n" RESET;
 		request->request_init(client_fd);
 	}
 	else
 	{
-		std::cout << LIGHT_BLUE << "new request form\n" RESET;
+		// std::cout << LIGHT_BLUE << "new request form\n" RESET;
 		request = new Request(client_fd);
 	}
 	if (request->get_connection() == "close")
@@ -123,7 +123,7 @@ Client::~Client()
 
 void Client::delete_request()
 {
-	std::cout << "deleting request\n";
+	// std::cout << "deleting request\n";
 	if (request != NULL)
 		delete request;
 	request = NULL;
