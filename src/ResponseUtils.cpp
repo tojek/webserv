@@ -49,7 +49,7 @@ struct stat {
 		}
 		else
 		{
-			set_status(HTTP_FORBIDDEN);
+			set_status(HTTP_NOT_FOUND);
 			content_type = "text/html";
 			return;
 		}
