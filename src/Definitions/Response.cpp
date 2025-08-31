@@ -76,23 +76,58 @@ const Location	*Response::select_location(const std::vector<Location> &locations
 	return (ret);
 }
 
-void	Response::get_full_path()
+// void	Response::get_full_path()
+// {
+// 	size_t	pos, dot;
+// 	char path[1000];
+
+// 	pos = request_uri.find_last_of('/');
+// 	std::string execfile = request_uri.substr(pos + 1);
+// 	dot = request_uri.find('.');
+
+// 	realpath(location_block->get_root().c_str(), path);
+// 	root = path;
+
+// 	if (dot == std::string::npos && execfile.empty()) // directory request
+// 		resource_full_path = root;
+// 	else // it's a file request
+// 		resource_full_path = root + request_uri;
+// 	// Debug::display1("full path", resource_full_path);
+// }
+
+void Response::get_full_path()
 {
-	size_t	pos, dot;
-	char path[1000];
+    std::string root = location_block->get_root();
+    std::string location_path = location_block->get_location_path();
 
-	pos = request_uri.find_last_of('/');
-	std::string execfile = request_uri.substr(pos + 1);
-	dot = request_uri.find('.');
+    // Remove trailing /
+    if (!root.empty() && root[root.length() - 1] == '/')
+        root = root.substr(0, root.length() - 1);
 
-	realpath(location_block->get_root().c_str(), path);
-	root = path;
+    // Remove location path from request_uri to get the relative path
+    std::string relative_path = request_uri;
 
-	if (dot == std::string::npos && execfile.empty()) // directory request
-		resource_full_path = root;
-	else // it's a file request
-		resource_full_path = root + request_uri;
-	// Debug::display1("full path", resource_full_path);
+    // If request_uri starts with location_path, remove it
+    if (relative_path.find(location_path) == 0)
+    {
+        relative_path = relative_path.substr(location_path.length());
+    }
+
+    // Ensure relative_path starts with /
+    if (relative_path.empty() || relative_path[0] != '/')
+        relative_path += "/";
+
+    // Build full path: root + relative_path
+    resource_full_path = root + relative_path;
+
+    // Debug
+    std::cout << "=== PATH DEBUG ===" << std::endl;
+    std::cout << "Request URI: " << request_uri << std::endl;
+    std::cout << "Location path: " << location_path << std::endl;
+    std::cout << "Root: " << root << std::endl;
+    std::cout << "Relative path: " << relative_path << std::endl;
+    std::cout << "Full path: " << resource_full_path << std::endl;
+    std::cout << "==================" << std::endl;
 }
 
 void	Response::init_resource()
