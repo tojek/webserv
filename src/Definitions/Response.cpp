@@ -28,14 +28,14 @@ std::string	Response::make_response()
         //     headers << resource;
 
 
-	// std::cout << "HTTP/1.1 " << code << " " << text << "\r\n"
-	// 	<< "Server: SeriousServer\r\n"
-	// 	<< "Date: " << date_str << "\r\n"
-	// 	<< "Content-Type: " << content_type << "\r\n"
-	// 	<< "Content-Length: " << resource.size() << "\r\n";
-	// 	if (is_redirection == true)
-	// 		std::cout << "Location: " << redir_location << "\r\n";
-	// 	std::cout << "Connection: keep-alive\r\n\r\n";
+	std::cout << "HTTP/1.1 " << code << " " << text << "\r\n"
+		<< "Server: SeriousServer\r\n"
+		<< "Date: " << date_str << "\r\n"
+		<< "Content-Type: " << content_type << "\r\n"
+		<< "Content-Length: " << resource.size() << "\r\n";
+		if (is_redirection == true)
+			std::cout << "Location: " << redir_location << "\r\n";
+		std::cout << "Connection: keep-alive\r\n\r\n";
 
 		return (headers.str());
 }
@@ -45,6 +45,7 @@ void Response::init_response(Request *request, Server *server)
 	this->request = request;
 	body = request->get_body();
 	body_size = request->get_body_size();
+	body_limit_exceeded = request->is_max_body_exceeded();
 	method = request->get_method();
 	request_uri = request->get_request_uri();
 	http_version = request->get_http_version();
@@ -136,12 +137,12 @@ void	Response::init_resource()
 
 	if (is_cgi() && method != "DELETE")
 		cgi_handler();
-	// else if (body_size > server_block->client_max_body_size)
-	// {
-	// 	set_status(HTTP_PAYLOAD_TOO_LARGE);
-	// 	resource = "<html><body><h1>" + code + " " + text + "</h1></body></html>";
-	// 	content_type = "text/html";
-	// }
+	else if (body_limit_exceeded)
+	{
+		set_status(HTTP_PAYLOAD_TOO_LARGE);
+		resource = "<html><body><h1>" + code + " " + text + "</h1></body></html>";
+		content_type = "text/html";
+	}
 	else if (location_block->get_return() != "" && method != "DELETE")
 		handle_redirection();
 	else if (method == "DELETE")

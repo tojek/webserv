@@ -47,6 +47,7 @@ class Response
 	private:
 		std::string			body;
 		size_t				body_size;
+		bool				body_limit_exceeded;
 
 		std::string			method;
 		std::string 		host;

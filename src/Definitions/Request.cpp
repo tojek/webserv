@@ -30,9 +30,7 @@ void	Request::request_init(int client_fd)
 	this->client_fd = client_fd;
     size_t pos = 0;
     std::map<std::string, std::string>::const_iterator it;
-	request_complete = false;
-	connection_closed = false;
-	body_parsed = false;
+
 
     n = recv(client_fd, buffer, sizeof(buffer), 0);
 
@@ -63,7 +61,6 @@ void	Request::request_init(int client_fd)
     	{
 			// std::cout << "Content-Length token found!\n";
         	std::istringstream(tokens["Content-Length"]) >> body_size;
-
         	while (body.size() < body_size)
         	{
          		n = recv(client_fd, buffer, sizeof(buffer), 0);
@@ -75,7 +72,6 @@ void	Request::request_init(int client_fd)
     	}
     	else if (((it = tokens.find("Transfer-Encoding")) != tokens.end()))
     	{
-			zero_byte_found = false;
 			// std::cout << "Transfer-Encoding token found!\n";
     		if (tokens["Transfer-Encoding"] == "chunked")
             {
@@ -92,16 +88,27 @@ void	Request::request_init(int client_fd)
 		// Debug::display_trace(tokens);
 		request_complete = true;
 	}
+	if (max_size_exceeded)
+	{
+		std::cout << LIGHT_BLUE "max body size exceeded!!\n" RESET;
+
+		request_complete = true;
+	}
 	// else
 		// std::cout << "not finished\n";
 }
 
 Request::Request() {}
 
-Request::Request(int client_fd)
+Request::Request(int client_fd, const Config &conf)
 {
+	// (void)conf;
 	headers_parsed = false;
 	request_complete = false;
+	connection_closed = false;
+	body_parsed = false;
+	max_size_exceeded = false;
+	max_body_size = conf.client_max_body_size;
 	request_init(client_fd);
 }
 
@@ -205,7 +212,12 @@ bool Request::chunked_request_parser(const std::string raw_request, size_t pos)
         // Check if we have full chunk data + trailing CRLF
         if (raw_request.size() < chunk_data_start + chunk_size + 2)
             return false; // incomplete, need more data
-
+		if (body.size() + chunk_size > max_body_size)
+		{
+			// std::cout << LIGHT_BLUE "max body size exceeded!!\n" RESET;
+			max_size_exceeded = true;
+			return (false);
+		}
         // Append chunk to body
         body.append(raw_request.substr(chunk_data_start, chunk_size));
 
@@ -266,4 +278,12 @@ size_t	Request::get_body_size()
 bool	Request::is_request_complete()
 {
 	return (request_complete);
+}
+
+bool	Request::is_max_body_exceeded()
+{
+	if (max_size_exceeded)
+		return (true);
+	else
+		return (false);
 }

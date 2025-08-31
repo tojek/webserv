@@ -31,11 +31,13 @@ class Request
 		int	 								client_fd;
 		int									copy_client_fd;
 		size_t								body_size;
+		size_t								max_body_size;
 
 		bool								headers_parsed;
 		bool								body_parsed;
 		bool								zero_byte_found;
 		bool								request_complete;
+		bool								max_size_exceeded;
 
 		void	process_line(std::string& line, int line_num, bool body_flag);
 		void	parse_requestline(std::string& line);
@@ -44,7 +46,7 @@ class Request
 
 	public:
 		Request();
-		Request(int client_fd);
+		Request(int client_fd, const Config &conf);
 		~Request();
 
 		void		parse_request(std::string headers);
@@ -62,5 +64,6 @@ class Request
 		std::string	get_content_type();
 		std::string get_connection();
 
+		bool 		is_max_body_exceeded();
 		bool		is_request_complete();
 };

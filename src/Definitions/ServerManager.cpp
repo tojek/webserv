@@ -251,7 +251,7 @@ void ServerManager::handle_client_request(int client_fd, Server* server)
     Client* client = Client::find_client(*server, client_fd);
     if (client)
     {
-        client->read_request();
+        client->read_request(*server);
         if (client->request->is_request_complete())
         {
             if (!client->request->connection_closed)

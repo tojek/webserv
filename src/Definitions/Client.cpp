@@ -49,18 +49,13 @@ Client *Client::find_client(Server &serv, int event_fd)
 	return &(it->second);
 }
 
-void Client::read_request()
+void Client::read_request(Server &serv)
 {
 	if (request != NULL)
-	{
-		// std::cout << LIGHT_BLUE << "old request form\n" RESET;
 		request->request_init(client_fd);
-	}
 	else
-	{
-		// std::cout << LIGHT_BLUE << "new request form\n" RESET;
-		request = new Request(client_fd);
-	}
+		request = new Request(client_fd, serv.get_config());
+
 	if (request->get_connection() == "close")
 		connection_status = false;
 	else

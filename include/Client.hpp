@@ -31,7 +31,7 @@ public:
 	Request			*request;
 	static int		accept_client(Server &serv);
 	static Client	*find_client(Server &serv, int event_fd);
-	void			read_request();
+	void			read_request(Server &serv);
 	void			send_response(Server &serv);
 	int				get_client_fd();
 	int				get_blocking_flag();
