@@ -139,7 +139,7 @@ void	Response::init_resource()
 		cgi_handler();
 	else if (body_limit_exceeded)
 	{
-		set_status(HTTP_PAYLOAD_TOO_LARGE);
+		set_status(HTTP_CONTENT_TOO_LARGE);
 		resource = "<html><body><h1>" + code + " " + text + "</h1></body></html>";
 		content_type = "text/html";
 	}

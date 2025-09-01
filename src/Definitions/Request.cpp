@@ -17,7 +17,7 @@ void Request::parse_request(std::string headers)
 			continue ;
 		}
 		process_line(line, line_num, body_flag);
-	}	
+	}
 	headers_parsed = true;
 }
 
@@ -61,6 +61,16 @@ void	Request::request_init(int client_fd)
     	{
 			// std::cout << "Content-Length token found!\n";
         	std::istringstream(tokens["Content-Length"]) >> body_size;
+
+			//idk czy zostawiać -------------------------
+			if (body_size > max_body_size)
+			{
+				max_size_exceeded = true;
+				std::cout << "AAAAAAAAAAAAAAmax body size exceeded!!\n";
+				request_complete = true;
+				return;
+			}
+			// -----------------
         	while (body.size() < body_size)
         	{
          		n = recv(client_fd, buffer, sizeof(buffer), 0);
@@ -112,7 +122,7 @@ Request::Request(int client_fd, const Config &conf)
 	request_init(client_fd);
 }
 
-Request::~Request() 
+Request::~Request()
 {
 
 }
@@ -135,7 +145,7 @@ void Request::parse_requestline(std::string& line)
 	tokens.insert(std::pair<std::string, std::string>("method", request_line[0]));
 	tokens.insert(std::pair<std::string, std::string>("request_uri", request_line[1]));
 	tokens.insert(std::pair<std::string, std::string>("HTTP_version", request_line[2]));
-	
+
 	Debug::display_trace(tokens);
 }
 

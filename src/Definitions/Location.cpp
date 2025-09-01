@@ -61,6 +61,7 @@ void	Location::fill_tokens()
 	tokens["allowed_methods"] = &Location::read_allowed_methods;
 	tokens["upload_dir"] = &Location::read_upload_dir;
 	tokens["cgi_extension"] = &Location::read_cgi_extension;
+	tokens["cgi_path"] = &Location::read_cgi_path;
 	tokens["directory_listing"] = &Location::read_directory_listing;
 	tokens["return"] = &Location::read_return;
 }
@@ -106,6 +107,15 @@ const std::string Location::get_root() const
 const std::string	Location::get_cgi_extension() const
 {
 	std::map<std::string, std::string>::const_iterator it = directive.find("cgi_extension");
+	if (it != directive.end())
+		return it->second;
+	else
+		return ("");
+}
+
+const std::string Location::get_cgi_path() const
+{
+	std::map<std::string, std::string>::const_iterator it = directive.find("cgi_path");
 	if (it != directive.end())
 		return it->second;
 	else

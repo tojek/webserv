@@ -35,8 +35,14 @@ void	Response::cgi_handler()
 bool	Response::is_cgi()
 {
 	std::string	cgi_ext;
+	std::string	cgi_path;
 
 	cgi_ext = location_block->get_cgi_extension();
+	cgi_path = location_block->get_cgi_path();
+
+	// check if there is cgi path directive
+	if (!cgi_path.empty())
+		return (true);
 
 	if (request_uri.find("/cgi-bin/") != std::string::npos)
 		return (true);
@@ -48,7 +54,17 @@ bool	Response::is_cgi()
 
 void	Response::child_process()
 {
-	get_full_path();
+    std::string executable_path;
+    std::string cgi_path = location_block->get_cgi_path();
+
+    // Use cgi_path if specified, otherwise use the requested file
+    if (!cgi_path.empty())
+        executable_path = cgi_path;
+    else
+    {
+        get_full_path();
+        executable_path = resource_full_path;
+    }
 
 	close(pipe_in[1]);
 	dup2(pipe_in[0], STDIN_FILENO);
@@ -56,9 +72,10 @@ void	Response::child_process()
 	close(pipe_out[0]);
 	dup2(pipe_out[1], STDOUT_FILENO);
 	close(pipe_out[1]);
-	char *argv[] = { const_cast<char*>(resource_full_path.c_str()), NULL };
+
+	char *argv[] = { const_cast<char*>(executable_path.c_str()), NULL };
 	set_up_envp();
-	execve(resource_full_path.c_str(), argv, envp);
+	execve(executable_path.c_str(), argv, envp);
 	if (envp != NULL) {
 		for (size_t i = 0; envp[i] != NULL; ++i) {
 			free(envp[i]);

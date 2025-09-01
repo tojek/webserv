@@ -84,6 +84,23 @@ void Location::read_cgi_extension(int line_num, std::string& reminder)
 	directive["cgi_extension"] = cgi_extension_value;
 }
 
+void Location::read_cgi_path(int line_num, std::string& reminder)
+{
+	std::string	cgi_path_value;
+	size_t		semicolon_pos = reminder.find(';');
+
+	if (semicolon_pos == std::string::npos)
+		parser_error("Missing ';' after 'cgi_path' directive.", line_num);
+
+	cgi_path_value = reminder.substr(0, semicolon_pos);
+	trim_whitespace(cgi_path_value);
+
+	if (cgi_path_value.empty())
+		parser_error("Empty 'cgi_path' directive.", line_num);
+
+	directive["cgi_path"] = cgi_path_value;
+}
+
 void Location::read_directory_listing(int line_num, std::string& reminder)
 {
 	std::string	directory_listing_value;

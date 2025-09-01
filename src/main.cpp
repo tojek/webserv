@@ -49,7 +49,6 @@ int main(int argc, char *argv[])
 
         ServerManager manager(config);
         manager.init_servers();
-        // manager.run_single_server();
 		manager.run_multiple_servers();
 
     } catch (const std::exception& e) {

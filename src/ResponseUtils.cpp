@@ -200,8 +200,8 @@ void	Response::set_status(HttpStatus status)
 			set_status_line("405", "Method Not Allowed");
 			resource = get_error_page(405);
 			break;
-		case HTTP_PAYLOAD_TOO_LARGE:
-			set_status_line("413", "Payload Too Large");
+		case HTTP_CONTENT_TOO_LARGE:
+			set_status_line("413", "Content Too Large");
 			resource = get_error_page(413);
 			break;
 		case HTTP_URI_TOO_LONG:
