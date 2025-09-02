@@ -4,6 +4,7 @@
 #include <sys/stat.h>
 #include <cstdio>
 #include <dirent.h>
+#include <sstream>
 
 
 void	Response::static_file_handler()
@@ -86,6 +87,27 @@ void	Response::set_up_envp()
 	env_vars.push_back("GATEWAY_INTERFACE=CGI/1.1");
 	env_vars.push_back("SERVER_PROTOCOL=HTTP/1.1");
 	env_vars.push_back("SERVER_SOFTWARE=MyCppServer/1.0");
+	env_vars.push_back("REQUEST_URI=" + request_uri);
+	env_vars.push_back("SERVER_NAME=" + server_block->server_name);
+	
+	std::string server_port = "80"; // default port
+	if (!server_block->listen_configs.empty()) {
+		std::stringstream ss;
+		ss << server_block->listen_configs[0].port;
+		server_port = ss.str();
+	}
+	env_vars.push_back("SERVER_PORT=" + server_port);
+	
+	// PATH_INFO: the part of the request URI that follows the script name
+	// For CGI requests, typically the request_uri minus the location path
+	std::string path_info = request_uri;
+	std::string location_path = location_block->get_location_path();
+	if (path_info.find(location_path) == 0) {
+		path_info = path_info.substr(location_path.length());
+		if (path_info.empty())
+			path_info = "/";
+	}
+	env_vars.push_back("PATH_INFO=" + path_info);
 
 	envp = new char*[env_vars.size() + 1];
 	for (size_t i = 0; i < env_vars.size(); i++) {
