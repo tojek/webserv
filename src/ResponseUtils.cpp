@@ -81,7 +81,15 @@ void	Response::set_up_envp()
 	env_vars.push_back("REQUEST_METHOD=" + request->get_method());
 	env_vars.push_back("SCRIPT_FILENAME=" + resource_full_path);
 	env_vars.push_back("UPLOAD_DIR=" + upload_path);
-	env_vars.push_back("QUERY_STRING=");
+	
+	// Extract query string from request_uri
+	std::string query_string = "";
+	size_t query_pos = request_uri.find('?');
+	if (query_pos != std::string::npos) {
+		query_string = request_uri.substr(query_pos + 1);
+	}
+	env_vars.push_back("QUERY_STRING=" + query_string);
+	
 	env_vars.push_back("CONTENT_TYPE=" + request->get_content_type());
 	env_vars.push_back("CONTENT_LENGTH=" + request->get_content_size());
 	env_vars.push_back("GATEWAY_INTERFACE=CGI/1.1");

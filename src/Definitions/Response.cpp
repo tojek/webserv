@@ -116,7 +116,9 @@ void Response::get_full_path()
 
     // Ensure relative_path starts with /
     if (relative_path.empty() || relative_path[0] != '/')
-        relative_path += "/";
+    {
+        relative_path = "/" + relative_path;
+    }
 
     // Build full path: root + relative_path
     resource_full_path = root + relative_path;
