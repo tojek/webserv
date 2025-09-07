@@ -214,7 +214,12 @@ std::string	Response::get_content_type()
 	std::string	cont_type;
 
 	if (is_cgi())
-		return (cgi_content_type());
+	{
+		if (!content_type.empty())
+			return content_type;
+		else
+			return "text/html"; // Default for CGI
+	}
 	set_up_contenttypes();
 	pos = resource_full_path.find_last_of(".");
 	if (pos != std::string::npos)

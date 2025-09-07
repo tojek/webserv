@@ -48,4 +48,4 @@ fclean: clean
 re: fclean all
 	@echo "$(GREEN)Cleaned and rebuilt everything!$(DEF_COLOR)"
 
-.PHONY: all clean
+.PHONY: all clean fclean re

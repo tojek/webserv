@@ -71,8 +71,6 @@ class Response
 		void				set_up_envp();
 		int					pipe_in[2];
 		int					pipe_out[2];
-		std::string			cgi_content_type();
-		void				processCgiHeaders();
 
 		bool				is_redirection;
 		void				handle_redirection();
