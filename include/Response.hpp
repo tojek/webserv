@@ -72,6 +72,7 @@ class Response
 		int					pipe_in[2];
 		int					pipe_out[2];
 		std::string			cgi_content_type();
+		void				processCgiHeaders();
 
 		bool				is_redirection;
 		void				handle_redirection();
@@ -84,6 +85,7 @@ class Response
 		std::ostringstream	response_content;
 		int					is_method_allowed();
 		const Location		*select_location(const std::vector<Location> &locations);
+		bool				matchesRegex(const std::string& uri, const std::string& pattern);
 		void				init_resource();
 		void				set_status_line(std::string code, std::string text);
 		void				set_status(HttpStatus status);

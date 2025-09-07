@@ -174,7 +174,6 @@ void	Response::delete_method()
 	get_full_path();  
 	if (!is_method_allowed())
 		return ;
-	//std::cout << "DELETE DEBUG: Attempting to delete file: " << resource_full_path << std::endl;
 	if (std::remove(resource_full_path.c_str()) == -1)
 	{
 		//std::cout << "DELETE ERROR: Failed to delete file: " << resource_full_path << std::endl;

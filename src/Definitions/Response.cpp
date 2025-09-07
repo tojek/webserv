@@ -51,50 +51,108 @@ void Response::init_response(Request *request, Server *server)
 	http_version = request->get_http_version();
 	server_block = &server->get_config();
 	location_block = select_location(server_block->locations);
+	
 	init_resource();
 }
 
 const Location	*Response::select_location(const std::vector<Location> &locations)
 {
-	size_t i = 0;
-	const Location *ret;
-	std::string		uri_path;
-	size_t			pos = 0;
+	const Location *default_location = NULL;
+	const Location *prefix_match = NULL;
+	
+	// look for regex patterns and exact matches
+	// 1. regex match
+	// 2. exact match
+	// 3. prefix match
+	// 4. default location (/)
 
-	pos = request_uri.find("/", 1);
-	if (pos == std::string::npos)
-		uri_path = request_uri;
-	else
-		uri_path = request_uri.substr(0, pos);
-	while (i < locations.size())
+	for (size_t i = 0; i < locations.size(); i++)
 	{
-		if (locations[i].get_location_path() == "/")
-			ret = &locations[i];
-		else if (uri_path == locations[i].get_location_path())
-			return (&locations[i]);
-		i++;
+		std::string location_path = locations[i].get_location_path();
+		
+		// Check for regex patterns (starting with ~)
+		if (location_path.size() > 2 && location_path.substr(0, 2) == "~ ")
+		{
+			std::string pattern = location_path.substr(2); // Remove "~ "
+			if (matchesRegex(request_uri, pattern))
+				return &locations[i];
+		}
+		// Store default location (/)
+		else if (location_path == "/")
+			default_location = &locations[i];
+		else if (request_uri.find(location_path) == 0)
+		{
+			// Prefer longer matches
+			if (prefix_match == NULL || location_path.length() > prefix_match->get_location_path().length())
+				prefix_match = &locations[i];
+		}
 	}
-	return (ret);
+	
+	// Return best match: prefix match > default location
+	if (prefix_match != NULL)
+		return prefix_match;
+	
+	return default_location;
 }
 
-// void	Response::get_full_path()
-// {
-// 	size_t	pos, dot;
-// 	char path[1000];
+/** REGEX MATCHING
+ * 1. Literal Characters
+abc matches exactly "abc"
+hello matches exactly "hello"
 
-// 	pos = request_uri.find_last_of('/');
-// 	std::string execfile = request_uri.substr(pos + 1);
-// 	dot = request_uri.find('.');
+ * 2. Special Characters (Metacharacters)
+. - Matches any single character
+^ - Matches start of string
+$ - Matches end of string
+* - Matches 0 or more of the preceding character
++ - Matches 1 or more of the preceding character
+? - Matches 0 or 1 of the preceding character
+\ - Escapes special characters
 
-// 	realpath(location_block->get_root().c_str(), path);
-// 	root = path;
+ * 3. Character Classes
+[abc] - Matches any one of a, b, or c
+[a-z] - Matches any lowercase letter
+[0-9] - Matches any digit
+[^abc] - Matches anything except a, b, or c
 
-// 	if (dot == std::string::npos && execfile.empty()) // directory request
-// 		resource_full_path = root;
-// 	else // it's a file request
-// 		resource_full_path = root + request_uri;
-// 	// Debug::display1("full path", resource_full_path);
-// }
+ * 4. Common Patterns
+^/api/          # Starts with /api/
+\.(css|js)$     # Ends with .css or .js
+^/images/.*\.jpg$ # Starts with /images/ and ends with .jpg
+[0-9]+          # One or more digits
+\w+             # One or more word characters (letters, digits, underscore)
+ */
+
+bool Response::matchesRegex(const std::string& uri, const std::string& pattern)
+{
+	//check if pattern ends with '$' is regex
+	if (pattern.size() >= 2 && pattern.substr(pattern.size() - 1) == "$")
+	{
+		// remove '$'
+		std::string suffix_pattern = pattern.substr(0, pattern.size() - 1);
+		
+		// Convert \. to .
+		std::string processed;
+		for (size_t i = 0; i < suffix_pattern.size(); i++)
+		{
+			if (suffix_pattern[i] == '\\' && i + 1 < suffix_pattern.size())
+			{
+				processed += suffix_pattern[i + 1];
+				i++; // Skip next character
+			}
+			else
+				processed += suffix_pattern[i];
+		}
+		
+		// Check if URI ends with the processed suffix
+		if (uri.length() >= processed.length())
+		{
+			return uri.substr(uri.length() - processed.length()) == processed;
+		}
+		return false;
+	}
+	return false;
+}
 
 void Response::get_full_path()
 {
@@ -140,11 +198,7 @@ void	Response::init_resource()
 	if (is_cgi() && method != "DELETE")
 		cgi_handler();
 	else if (body_limit_exceeded)
-	{
 		set_status(HTTP_CONTENT_TOO_LARGE);
-		resource = "<html><body><h1>" + code + " " + text + "</h1></body></html>";
-		content_type = "text/html";
-	}
 	else if (location_block->get_return() != "" && method != "DELETE")
 		handle_redirection();
 	else if (method == "DELETE")
