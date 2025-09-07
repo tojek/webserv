@@ -43,9 +43,19 @@ bool	Response::is_cgi()
 	std::string	cgi_ext = location_block->get_cgi_extension();
 	std::string	cgi_path = location_block->get_cgi_path();
 
-	return (!cgi_path.empty() || 
-			request_uri.find("/cgi-bin/") != std::string::npos ||
-			(!cgi_ext.empty() && request_uri.find(cgi_ext) != std::string::npos));
+	// Check if CGI path is configured
+	if (!cgi_path.empty())
+		return true;
+		
+	// Check if request is to CGI directory
+	if (request_uri.find("/cgi-bin/") != std::string::npos)
+		return true;
+		
+	// Check if request matches CGI extension
+	if (!cgi_ext.empty() && request_uri.find(cgi_ext) != std::string::npos)
+		return true;
+		
+	return false;
 }
 
 
