@@ -171,11 +171,21 @@ std::string	Response::generate_directory_listing(const std::string& dir_path)
 
 void	Response::delete_method()
 {
+	get_full_path();  
 	if (!is_method_allowed())
 		return ;
+	//std::cout << "DELETE DEBUG: Attempting to delete file: " << resource_full_path << std::endl;
 	if (std::remove(resource_full_path.c_str()) == -1)
 	{
-		set_status(HTTP_FORBIDDEN);
+		//std::cout << "DELETE ERROR: Failed to delete file: " << resource_full_path << std::endl;
+		if (errno == ENOENT) //no entry, file doesn't exist
+			set_status(HTTP_NOT_FOUND);
+		else if (errno == EACCES || errno == EPERM) // wrong access, wrong permissions, permission denied
+			set_status(HTTP_FORBIDDEN);
+		else if (errno == EISDIR) // is a directory
+			set_status(HTTP_FORBIDDEN);
+		else
+			set_status(HTTP_INTERNAL_SERVER_ERROR);  // Other errors
 		return ;
 	}
 	else
