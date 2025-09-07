@@ -62,14 +62,36 @@ bool	Response::is_cgi()
 void	Response::child_process()
 {
 	std::string executable_path;
+	std::string script_path;
 	std::string cgi_path = location_block->get_cgi_path();
 
-	if (!cgi_path.empty())
+	get_full_path();
+	script_path = resource_full_path;
+
+	// Determine the appropriate interpreter based on file extension
+	std::string extension = "";
+	size_t dot_pos = script_path.find_last_of(".");
+	if (dot_pos != std::string::npos) {
+		extension = script_path.substr(dot_pos);
+	}
+
+	// Choose interpreter based on file extension
+	if (extension == ".php")
+	{
+		executable_path = "/usr/bin/php";
+	}
+	else if (extension == ".py")
+	{
+		executable_path = "/usr/bin/python3";
+	}
+	else if (!cgi_path.empty())
+	{
 		executable_path = cgi_path;
+	}
 	else
 	{
-		get_full_path();
-		executable_path = resource_full_path;
+		executable_path = script_path;
+		script_path = "";
 	}
 
 	// Redirect pipes
@@ -80,9 +102,23 @@ void	Response::child_process()
 	close(pipe_out[0]);
 	close(pipe_out[1]);
 
-	// Execute
-	char *argv[] = { const_cast<char*>(executable_path.c_str()), NULL };
 	set_up_envp();
-	execve(executable_path.c_str(), argv, envp);
-}
 
+	// Execute with appropriate arguments
+	if (!script_path.empty())
+	{
+		// Execute interpreter with script as argument
+		char *argv[] = { 
+			const_cast<char*>(executable_path.c_str()), 
+			const_cast<char*>(script_path.c_str()), 
+			NULL 
+		};
+		execve(executable_path.c_str(), argv, envp);
+	}
+	else
+	{
+		// Execute script directly
+		char *argv[] = { const_cast<char*>(executable_path.c_str()), NULL };
+		execve(executable_path.c_str(), argv, envp);
+	}
+}
