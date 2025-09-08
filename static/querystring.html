@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Query String Test</title>
+  <style>
+    body {
+      font-family: "Segoe UI", Arial, sans-serif;
+      background-color: #fdf6f0; /* soft cream pastel */
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+    .container {
+      background: #ffffff;
+      padding: 30px 40px;
+      border-radius: 16px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      text-align: center;
+    }
+    h1 {
+      color: #6b5b95; /* pastel purple */
+      margin-bottom: 20px;
+    }
+    label {
+      display: block;
+      margin: 12px 0 6px;
+      color: #555;
+    }
+    input[type="text"],
+    input[type="number"] {
+      padding: 8px 12px;
+      width: 100%;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      background-color: #f7f3f9; /* pale lavender */
+    }
+    input[type="submit"] {
+      margin-top: 20px;
+      background-color: #ffb7b2; /* soft coral pastel */
+      border: none;
+      padding: 10px 20px;
+      border-radius: 8px;
+      color: #fff;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    input[type="submit"]:hover {
+      background-color: #f88d8d;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Send Query String</h1>
+    <form action="/querythankyou.html" method="get">
+      <label for="name">Name</label>
+      <input type="text" id="name" name="name">
+
+      <label for="age">Age</label>
+      <input type="number" id="age" name="age">
+
+      <label for="color">Favorite Color</label>
+      <input type="text" id="color" name="color">
+
+      <input type="submit" value="Send">
+    </form>
+  </div>
+</body>
+</html>

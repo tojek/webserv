@@ -143,8 +143,21 @@ void Request::parse_requestline(std::string& line)
 
 	request_line = ft_split(line, " ");
 	tokens.insert(std::pair<std::string, std::string>("method", request_line[0]));
+
+	// is there query string in the request_uri string?
+	size_t pos = request_line[1].find("?");
+	if (pos != std::string::npos)
+	{
+		std::string	query_string = request_line[1].substr(pos);
+		tokens.insert(std::pair<std::string, std::string>("query_string", query_string));
+		Debug::display1("query_string", tokens["query_string"]);
+		request_line[1] = request_line[1].substr(0, pos);
+
+	}
+
 	tokens.insert(std::pair<std::string, std::string>("request_uri", request_line[1]));
 	tokens.insert(std::pair<std::string, std::string>("HTTP_version", request_line[2]));
+	Debug::display1("request_uri", tokens["request_uri"]);
 
 	Debug::display_trace(tokens);
 }
@@ -283,6 +296,14 @@ std::string Request::get_connection()
 size_t	Request::get_body_size()
 {
 	return (body_size);
+}
+
+std::string Request::get_query_string()
+{
+	std::map<std::string, std::string>::const_iterator it = tokens.find("query_string");
+	if (it == tokens.end() || it->second.empty())
+		return "";
+	return it->second;
 }
 
 bool	Request::is_request_complete()
