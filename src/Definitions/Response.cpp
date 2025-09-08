@@ -51,7 +51,7 @@ void Response::init_response(Request *request, Server *server)
 	http_version = request->get_http_version();
 	server_block = &server->get_config();
 	location_block = select_location(server_block->locations);
-	
+
 	init_resource();
 }
 
@@ -59,7 +59,7 @@ const Location	*Response::select_location(const std::vector<Location> &locations
 {
 	const Location *default_location = NULL;
 	const Location *prefix_match = NULL;
-	
+
 	// look for regex patterns and exact matches
 	// 1. regex match
 	// 2. exact match
@@ -69,7 +69,7 @@ const Location	*Response::select_location(const std::vector<Location> &locations
 	for (size_t i = 0; i < locations.size(); i++)
 	{
 		std::string location_path = locations[i].get_location_path();
-		
+
 		// Check for regex patterns (starting with ~)
 		if (location_path.size() > 2 && location_path.substr(0, 2) == "~ ")
 		{
@@ -87,11 +87,11 @@ const Location	*Response::select_location(const std::vector<Location> &locations
 				prefix_match = &locations[i];
 		}
 	}
-	
+
 	// Return best match: prefix match > default location
 	if (prefix_match != NULL)
 		return prefix_match;
-	
+
 	return default_location;
 }
 
@@ -130,7 +130,7 @@ bool Response::matchesRegex(const std::string& uri, const std::string& pattern)
 	{
 		// remove '$'
 		std::string suffix_pattern = pattern.substr(0, pattern.size() - 1);
-		
+
 		// Convert \. to .
 		std::string processed;
 		for (size_t i = 0; i < suffix_pattern.size(); i++)
@@ -143,7 +143,7 @@ bool Response::matchesRegex(const std::string& uri, const std::string& pattern)
 			else
 				processed += suffix_pattern[i];
 		}
-		
+
 		// Check if URI ends with the processed suffix
 		if (uri.length() >= processed.length())
 		{
@@ -168,37 +168,33 @@ void Response::get_full_path()
 
     // If request_uri starts with location_path, remove it
     if (relative_path.find(location_path) == 0)
-    {
         relative_path = relative_path.substr(location_path.length());
-    }
 
     // Ensure relative_path starts with /
     if (relative_path.empty() || relative_path[0] != '/')
-    {
         relative_path = "/" + relative_path;
-    }
 
     // Build full path: root + relative_path
     resource_full_path = root + relative_path;
 
-    // Debug
-    std::cout << "=== PATH DEBUG ===" << std::endl;
-    std::cout << "Request URI: " << request_uri << std::endl;
-    std::cout << "Location path: " << location_path << std::endl;
-    std::cout << "Root: " << root << std::endl;
-    std::cout << "Relative path: " << relative_path << std::endl;
-    std::cout << "Full path: " << resource_full_path << std::endl;
-    std::cout << "==================" << std::endl;
+    // // Debug
+    // std::cout << "=== PATH DEBUG ===" << std::endl;
+    // std::cout << "Request URI: " << request_uri << std::endl;
+    // std::cout << "Location path: " << location_path << std::endl;
+    // std::cout << "Root: " << root << std::endl;
+    // std::cout << "Relative path: " << relative_path << std::endl;
+    // std::cout << "Full path: " << resource_full_path << std::endl;
+    // std::cout << "==================" << std::endl;
 }
 
 void	Response::init_resource()
 {
 	is_redirection = false;
 
-	if (is_cgi() && method != "DELETE")
-		cgi_handler();
-	else if (body_limit_exceeded)
+	if (body_limit_exceeded)
 		set_status(HTTP_CONTENT_TOO_LARGE);
+	else if (is_cgi() && method != "DELETE")
+		cgi_handler();
 	else if (location_block->get_return() != "" && method != "DELETE")
 		handle_redirection();
 	else if (method == "DELETE")

@@ -7,10 +7,10 @@ void	Response::cgi_handler()
 {
 	set_status(HTTP_OK);
 	content_type = "text/html";
-	
+
 	pipe(pipe_out);
 	pipe(pipe_in);
-	
+
 	pid_t pid = fork();
 	if (pid == 0)
 		child_process();
@@ -30,10 +30,10 @@ void	Response::cgi_handler()
 		ssize_t bytes;
 		while ((bytes = read(pipe_out[0], buffer, sizeof(buffer))) > 0)
 			buf.write(buffer, bytes);
-		
+
 		close(pipe_out[0]);
 		waitpid(pid, NULL, 0);
-		
+
 		resource = buf.str();
 	}
 }
@@ -46,15 +46,15 @@ bool	Response::is_cgi()
 	// Check if CGI path is configured
 	if (!cgi_path.empty())
 		return true;
-		
+
 	// Check if request is to CGI directory
 	if (request_uri.find("/cgi-bin/") != std::string::npos)
 		return true;
-		
+
 	// Check if request matches CGI extension
 	if (!cgi_ext.empty() && request_uri.find(cgi_ext) != std::string::npos)
 		return true;
-		
+
 	return false;
 }
 
@@ -77,17 +77,17 @@ void	Response::child_process()
 
 	// Choose interpreter based on file extension
 	if (extension == ".php")
-	{
 		executable_path = "/usr/bin/php";
-	}
 	else if (extension == ".py")
-	{
 		executable_path = "/usr/bin/python3";
-	}
+	else if (extension == ".pl")
+		executable_path = "/usr/bin/perl";
+	else if (extension == ".rb")
+		executable_path = "/usr/bin/ruby";
+	else if (extension == ".sh")
+		executable_path = "/bin/bash";
 	else if (!cgi_path.empty())
-	{
 		executable_path = cgi_path;
-	}
 	else
 	{
 		executable_path = script_path;
@@ -108,10 +108,10 @@ void	Response::child_process()
 	if (!script_path.empty())
 	{
 		// Execute interpreter with script as argument
-		char *argv[] = { 
-			const_cast<char*>(executable_path.c_str()), 
-			const_cast<char*>(script_path.c_str()), 
-			NULL 
+		char *argv[] = {
+			const_cast<char*>(executable_path.c_str()),
+			const_cast<char*>(script_path.c_str()),
+			NULL
 		};
 		execve(executable_path.c_str(), argv, envp);
 	}

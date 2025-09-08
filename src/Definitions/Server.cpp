@@ -54,7 +54,7 @@ Server::Server(const Config& conf) : conf(conf)
 	if (listen(server_fd, 10) < 0)
 		error("listen error.");
 	addrlen = sizeof(address);
-	std::cout << "Serwer działa na http://" << listen_conf.host << ":" << listen_conf.port << std::endl;
+	// std::cout << "Serwer działa na http://" << listen_conf.host << ":" << listen_conf.port << std::endl;
 }
 
 int Server::get_server()

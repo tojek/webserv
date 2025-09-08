@@ -93,4 +93,6 @@ class Response
 		std::string							get_content_type();
 		void								set_up_contenttypes();
 		std::map<std::string, std::string>	cont_types;
+		std::string get_file_extension(const std::string& path);
+		std::string get_interpreter_path(const std::string& extension);
 };

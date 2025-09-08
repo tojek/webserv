@@ -258,18 +258,24 @@ void ServerManager::handle_client_request(int client_fd, Server* server)
                 client->send_response(*server);
             if (client->connection_status == false || client->request->connection_closed == true)
             {
-                // delete client;
-               epoll_ctl(master_epoll_fd, EPOLL_CTL_DEL, client_fd, NULL);
-               std::cout << "Handled request and closed connection on fd " << client_fd << std::endl;
+                epoll_ctl(master_epoll_fd, EPOLL_CTL_DEL, client_fd, NULL);
+                close(client_fd);
+                std::cout << "Handled request and closed connection on fd " << client_fd << std::endl;
             }
             else
-               std::cout << "Keeping connection alive on fd " << client_fd << std::endl;
+            {
+                std::cout << "Keeping connection alive on fd " << client_fd << std::endl;
+            }
             client->delete_request();
-
         }
     }
     else
+    {
         std::cerr << "Warning: Could not find client for fd " << client_fd << std::endl;
+        epoll_ctl(master_epoll_fd, EPOLL_CTL_DEL, client_fd, NULL);
+        close(client_fd);
+        std::cerr << "Closed orphaned fd " << client_fd << std::endl;
+    }
 }
 
 void ServerManager::process_events(int num_events)
