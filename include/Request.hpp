@@ -63,6 +63,7 @@ class Request
 		std::string	get_content_size();
 		std::string	get_content_type();
 		std::string get_connection();
+		std::string	get_query_string();
 
 		bool 		is_max_body_exceeded();
 		bool		is_request_complete();
