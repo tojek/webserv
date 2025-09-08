@@ -71,18 +71,19 @@ void	Request::request_init(int client_fd)
 				return;
 			}
 			// -----------------
-        	while (body.size() < body_size)
-        	{
-         		n = recv(client_fd, buffer, sizeof(buffer), 0);
+			while (body.size() < body_size)
+			{
+				n = recv(client_fd, buffer, sizeof(buffer), 0);
 				if (n == 0)
 					break;
-           		body.append(buffer, n);
-        	}
+				if (n > 0)
+					body.append(buffer, n);
+			}
 			body_parsed = true;
     	}
     	else if (((it = tokens.find("Transfer-Encoding")) != tokens.end()))
     	{
-			// std::cout << "Transfer-Encoding token found!\n";
+			std::cout << "Transfer-Encoding token found!\n";
     		if (tokens["Transfer-Encoding"] == "chunked")
             {
 				if (chunked_request_parser(raw_request, pos))
