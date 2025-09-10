@@ -3,6 +3,7 @@
 #define PINK "\033[1;38;5;205m"       // Bold Pink
 #define LIGHT_PINK "\033[1;38;5;217m" // Bold Light Pink
 #define LIGHT_BLUE "\033[1;38;5;153m" // Bold Light Blue
+#define LY "\033[1;38;5;227m" // Bold Light Yellow
 #define RESET "\033[0m"               // Reset to default color
 
 #include <iostream>
@@ -16,4 +17,6 @@
 namespace Debug {
 	void display1(std::string str1, std::string str2);
 	void display_trace(std::map<std::string, std::string> tokens);
+	void debug();
+	void debug(std::string mes);
 }

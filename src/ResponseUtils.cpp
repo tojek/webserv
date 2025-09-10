@@ -145,7 +145,7 @@ std::string	Response::generate_directory_listing(const std::string& dir_path)
 				if (!url.empty() && url[url.length() - 1] != '/')
 					url += "/";
 				url += name;
-
+				// Debug::debug(url);
 				html << "<li><a href=\"" << url << "\">" << name << "</a></li>";
 			}
 		}

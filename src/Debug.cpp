@@ -14,4 +14,14 @@ namespace Debug {
 		std::cout << " [request uri]: " << tokens["request_uri"] << RESET << std::endl;
 	}
 
+	void debug()
+	{
+		std::cout << LY "debug point\n" RESET;
+	}	
+	
+	void debug(std::string message)
+	{
+		std::cout << LY "debug point: " RESET << message << std::endl;
+	}
+
 }

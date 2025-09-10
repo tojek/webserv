@@ -37,6 +37,7 @@ for part in parts:
         else:
             save_name = filename
         save_path = os.path.join(upload_dir, os.path.basename(save_name))
+        os.makedirs(os.path.dirname(save_path), exist_ok=True)
         with open(save_path, "wb") as f:
             f.write(file_content)
         saved_files.append(save_path)

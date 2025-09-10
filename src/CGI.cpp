@@ -67,7 +67,7 @@ void	Response::child_process()
 
 	get_full_path();
 	script_path = resource_full_path;
-
+	// Debug::debug(script_path); // ./cgi-bin/upload.py
 	// Determine the appropriate interpreter based on file extension
 	std::string extension = "";
 	size_t dot_pos = script_path.find_last_of(".");
@@ -107,12 +107,16 @@ void	Response::child_process()
 	// Execute with appropriate arguments
 	if (!script_path.empty())
 	{
+		if (script_path[0] == '.' && script_path[1] == '/')
+			script_path = script_path.substr(2);
 		// Execute interpreter with script as argument
 		char *argv[] = {
 			const_cast<char*>(executable_path.c_str()),
 			const_cast<char*>(script_path.c_str()),
 			NULL
 		};
+		// Debug::debug(executable_path);
+		// Debug::debug(script_path);
 		execve(executable_path.c_str(), argv, envp);
 	}
 	else
